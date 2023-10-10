@@ -19,12 +19,12 @@
             <span class="font-bold text-xl">Rating</span> 
               <!-- filter by rating  -->
             {% for count in range(4, 0, -1)  -%}
-            <form
+            <a
             {% if star_underline == count -%}
                 class="border-b border-solid border-yellow-500 w-fit"   
             {%- endif %}
             id="rating{{count}}"
-            hx-get="{{ url_for(request.endpoint, **request.args | filter_args('rating_gt')) }}"
+            href="{{ url_for(request.endpoint, rating_gt=count, **request.args | filter_args('rating_gt')) }}"
             hx-trigger="click from:find .filter"
             hx-target="#products-results" 
             hx-select="#products-results"
@@ -33,7 +33,6 @@
             hx-select-oob="#product-filter"
             hx-push-url="true"
             >
-                <input type="hidden" name="rating_gt" value="{{count}}">
                 <span class="filter text-sm hover:text-yellow-500 
                 {% if star_underline == count -%}
                 text-yellow-500"   
@@ -46,21 +45,31 @@
                 {%- endfor %}
                     <span class="text-sm">& Up</span> 
                 </span>
-            </form>
+            </a>
             {%- endfor %}
         </div>
         <!-- filter by price range -->
         <div id='product-price-filter' hx-swap='true'  class="grid">
             <span class="font-bold text-xl">Price</span>
+
             {% for price_range in price_ranges  -%}
-                <form
+
+                    {% set current_args = current_args | filter_args('price_min', 'price_max') %}
+
+                    {% if price_range.get('min') -%}
+                        {% set _=current_args.__setitem__("price_min", price_range.get('min') | int) %}
+                    {%- endif %}
+
+                    {% if price_range.get('max') -%}
+                        {% set _=current_args.__setitem__("price_max", price_range.get('max') | int) %}
+                    {%- endif %}
+                <a
                 id="price-f{{loop.index}}"
-                hx-get="{{ url_for(request.endpoint, **request.args | filter_args('price_max', 'price_min')) }}"
+                href="{{ url_for(request.endpoint,  **current_args)  }}"
                 hx-trigger="click from:find .filter"
                 hx-target="#products-results" 
                 hx-select="#products-results" 
                 hx-swap="outerHTML"
-
                 hx-select-oob="#product-filter"
                 hx-push-url="true" 
                 class="w-fit"
@@ -68,13 +77,8 @@
                     <span class="filter cursor-pointer hover:text-yellow-500 {% if price_range['active'] == true %}
                         text-yellow-500
                     {% endif %}">{{ price_range['display']}}</span>
-                    {% if price_range.get('min') -%}
-                    <input type="hidden" name="price_min" value="{{price_range.get('min') | int}}">
-                    {%- endif %}
-                    {% if price_range.get('max') -%}
-                    <input type="hidden" name="price_max" value="{{price_range.get('max') | int}}">
-                    {%- endif %}
-                </form>
+                    
+                </a>
             {% endfor -%}
 
             <!-- filter by price range form -->

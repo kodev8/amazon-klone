@@ -43,9 +43,7 @@ def user_loader(user_id):
 # remove arguments from search filter so when a new search/filter is made it is updated correctly
 @app.template_filter('filter_args')
 def filter_args(args, *args_to_remove):
-
     args = dict(args)
-
     for arg in args_to_remove:
         if arg in args:
             del args[arg]
@@ -71,7 +69,7 @@ def manage_session():
 
     # create a permanent session to persist even when the browser closes
     if not session.get('PERMANENT_SET'):
-        app.logger.ingfo('Permnanet session created')
+        app.logger.info('Permnanet session created')
         session['PERMANENT_SET'] = True
         session.permanent = True
 
@@ -79,7 +77,7 @@ def manage_session():
 def create_cache(request, template):
     cache_check = (request.url, request.method)
     if not cache.get(cache_check):
-        app.logger.info('ADDDING', cache_check, 'TO CACHE')
+        app.logger.info(f'ADDDING {cache_check}TO CACHE')
         # cache[cache_check] = template
         
 @app.before_request
@@ -97,22 +95,22 @@ def after_request(response):
     return response
 
 # GLOBAL LOGGING
-@app.before_request
-def log_requests():
-    # app.logger.info(f'REQUEST HEADERS: {request.headers}\n')
-    app.logger.info(f'REQUEST METHOD: {request.method} - URL: { request.url}\n')
+# @app.before_request
+# def log_requests():
+#     # app.logger.info(f'REQUEST HEADERS: {request.headers}\n')
+#     app.logger.info(f'REQUEST METHOD: {request.method} - URL: { request.url}\n')
 
-@app.after_request
-def log_responses_global(response):
-    app.logger.info(f'RESPONSE STATUS: {response.status}')
-    return response
+# @app.after_request
+# def log_responses_global(response):
+#     app.logger.info(f'RESPONSE STATUS: {response.status}')
+#     return response
 
-@app.after_request
-def log_login_responses(response):
-    if request.endpoint == 'login':
-        app.logger.info(f'LOGIN REQUEST STATUS: {response.status}\n', request.method)
+# @app.after_request
+# def log_login_responses(response):
+#     if request.endpoint == 'login':
+#         app.logger.info(f'LOGIN REQUEST STATUS: {response.status}\n', request.method)
 
-    return response
+#     return response
 
 
 # set up 404 page
@@ -338,15 +336,22 @@ def get_products():
         star_underline = int(rating)
 
     for i, price_range in enumerate(price_ranges,1):
+        print('')
         if (price_min==price_range['min']) and(price_max==price_range['max']):
             price_range['active'] = True
+            print('ACTIVE: ', price_range['active'] )
             break
     
     # dump the products found to Product object
     res_products = [Product.dump(product) for product in products.find(query)]
 
+    # CHANGE
+    # convert Immutable Dict to regular dict which is updated for each filter link 
+    current_args = dict(request.args)
+    print('HIGHLIGHTT: ', highlight)
+
     template = render_template("pages/products/products.html", products=res_products, price_ranges=price_ranges,
-                               auto_fill=auto_fill, highlight=highlight, star_underline=star_underline)
+                               auto_fill=auto_fill, highlight=highlight, star_underline=star_underline, current_args=current_args)
     
     # cache frequent search results
     create_cache(request, template)
@@ -427,7 +432,7 @@ def cart_add_suggested():
 
     return htmx_redirect(url_for('cart'))
 
-@app.route("/checkout", methods=['POST', 'GET'],endpoint='checkout-single')
+@app.route("/checkout-s", methods=['POST', 'GET'],endpoint='checkout-single')
 @app.route("/cart/add", methods=['POST'])
 @htmx_request
 def cart_add():
@@ -616,8 +621,8 @@ def search():
     results = [Product.dump(prod) for prod in products.find(db_query).limit(10)]
 
     template = render_template('htmx/search-results.html', results=results)
+    print(template)
     # cache freq search results
-    create_cache(request, template)
     return template
 
 # =============================================================================================
