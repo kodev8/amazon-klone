@@ -1,0 +1,19 @@
+{% from 'components/notifs.html' import oob_notif %}
+
+{% include 'htmx/modals/closed-modal.html' %}
+
+{% if address %}
+
+
+    <p hx-swap-oob="true" id="addr-text">
+    {% if address.zip_code %}
+    {{ address.zip_code }}
+    {% elif address.city %}
+    {{ address.city }}
+    {% endif %}
+    
+    </p>
+
+    {{ oob_notif(message='Your address has been changed.', type='success') }}
+        
+{% endif %}

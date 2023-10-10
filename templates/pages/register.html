@@ -1,0 +1,56 @@
+{% from './components/forms.html' import customInput %} 
+
+{% extends 'templates/noAuth-login-register.html' -%} 
+
+{% block bottom_content %}
+
+
+<div class="bg-white border border-solid border-slate-500 rounded-xl p-6">
+
+  <form
+  hx-boost="true"
+  method="POST"
+  novalidate
+  action="{{ url_for('register') }}"
+  hx-target="#messages"
+  hx-swap="innerHTML"
+class="grid sm:grid-cols-2 gap-y-8 gap-x-2"
+>
+<h4 class="text-3xl text-black font-medium col-span-full">
+Create Account
+</h4>
+
+{% for field in form %} 
+    {% if field.type=='SubmitField' %}
+      <span class="mt-8 col-span-full">
+      {{ customInput(field, field.id) }} 
+      </span>
+    {%else%}
+    {{ customInput(field, field.id in ['username','email', 'dob']) }} 
+
+    {% endif %}
+
+
+{% endfor %}
+</form>
+
+
+<div class="w-full relative  border-b-2 border-b-solid border-b-slate-200 shadow-sm col-span-full my-2">
+</div>
+
+<span class="text-sm">Already have an account?
+  <span class="text-blue-600">
+    <a href="{{ url_for('login') }}">Sign in</a>
+    <i class="fa-solid fa-caret-right text-[10px]"></i>
+  </span>
+</span>
+ 
+
+</div>
+
+ 
+
+
+
+
+{%- endblock bottom_content -%}

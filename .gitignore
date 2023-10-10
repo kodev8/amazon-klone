@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+amazon-klone/
+instance/
+static/assets/
+sub/__pycache__/
+.env
+dev.txt
+package-lock.json
+package.json
+requirements.txt

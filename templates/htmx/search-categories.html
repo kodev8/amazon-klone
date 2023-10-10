@@ -1,0 +1,7 @@
+
+{% for cat in categories  %}
+    <option value="{{ cat.key.lower() }}" 
+    {% if active_category == cat.key  -%}
+        selected
+    {%- endif %}>{{ cat.title }}</option>
+{% endfor %}

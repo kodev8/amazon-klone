@@ -1,0 +1,63 @@
+{% from './components/modal.html' import modalBG %}
+{% from './components/notifs.html' import notif %}
+ 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}"></link>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="{{ url_for('static', filename='scripts/htmx.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/class-tools.js') }}"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/multi-swap.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
+
+    <script type="text/javascript" src="{{url_for('static', filename='scripts/main.js')}}"></script>
+
+
+    <title>Amazon</title>
+</head>
+<body hx-boost="true" hx-ext="multi-swap">
+    <div id="messages"  class="fixed w-full z-[70]"> 
+        {% with messages = get_flashed_messages(with_categories=true) -%}
+            {% if messages -%}
+                {% for category, message in messages -%}
+                    {{ notif(message, category) }}
+                {%- endfor %}
+            {%- endif %}
+        {%- endwith %}
+
+    </div>
+    {{ modalBG(false) }}
+    <div class="relative h-full w-full">
+
+        {% block content %}
+
+
+        {% endblock %}
+    </div>
+    <script>
+//         htmx.logAll();
+//         htmx.on("htmx:afterRequest", function(evt) {
+//     console.log("The element that dispatched the request: ", evt.detail.elt);
+//     console.log("The XMLHttpRequest: ", evt.detail.xhr);
+//     console.log("The target of the request: ", evt.detail.target);
+//     console.log("The configuration of the AJAX request: ", evt.detail.requestConfig);
+//     console.log("The event that triggered the request: ", evt.detail.requestConfig.triggeringEvent);
+//     console.log("True if the response has a 20x status code or is marked detail.isError = false in the htmx:beforeSwap event, else false: ", evt.detail.successful);
+//     console.log("true if the response does not have a 20x status code or is marked detail.isError = true in the htmx:beforeSwap event, else false: ", evt.detail.failed);
+//     console.log('BREAKE')
+//     console.log(' ')
+// });
+    </script>
+    <script src="{{ url_for('static', filename='scripts/flowbite.min.js') }}" defer></script>
+    <script type="text/javascript" src="{{url_for('static', filename='scripts/panel.js')}}" defer></script>
+</body>
+</html>

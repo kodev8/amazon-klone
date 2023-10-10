@@ -1,0 +1,323 @@
+{% from './components/amazon.html' import customButton %}
+
+
+<!-- INLINE ERROR -->
+{% macro inlineError(fieldID, text, swap=false) -%}
+  <span id="{{ fieldID }}-error" {% if swap %} hx-swap-oob="true"  {% endif %} class="inline-error absolute flex top-[100%] text-red-500 text-xs text-justify">{{ text }}</span>
+{%- endmacro %}
+
+
+<!-- CUSTOM INPUT -->
+{% macro customInput(field, span_full=false) -%} 
+
+  {% if field.type == 'CSRFTokenField' %} 
+
+    {{ field }} 
+    
+    {% if field.errors %}
+      <div>You have submitted an invalid CSRF token</div>
+    {% endif %} 
+    
+  {% elif field.type == 'HiddenField' %}
+
+     {{ field }} 
+
+  {% elif field.type == 'SubmitField' %}
+
+    {{ customButton(field.label.text, as_submit=true) }}
+
+  {% else %} 
+
+    {% set classes = "custom-input w-full h-full outline-none border-none pl-2" %} 
+    {% set labelClasses = "absolute left-2 text-sm" %} 
+
+    {% if field.type == 'TextAreaField' %} 
+      {% set classes = classes + " resize-none no-scrollbar p-4" %} 
+      {% set divClasses = "min-h-[100px]" %} {% set labelClasses = labelClasses + " top-3" %}
+
+   
+
+    {% endif %}
+
+  
+      <div class="relative {% if span_full %}col-span-full {% endif %} {{ divClasses }} flex items-center h-12 rounded-sm border bg-transparent text-sm outline-none border-gray-200">
+        
+        {{ field(class=classes , placeholder="", autocomplete="off")}} 
+        {{ field.label(class=labelClasses)}} 
+        
+        {% if field.type == 'PasswordField' %}
+
+          <i class="fa-regular fa-eye-slash eye-icon"></i>
+        {% endif %}
+
+        {% if field.type == 'TextAreaField' %}
+
+          <div class="absolute bottom-2 right-2">{{ textCount(field, 150) }}</div>
+
+        {% endif %}
+
+        {{ inlineError(field.id) }}
+
+          
+      </div>
+
+  {% endif %} 
+{%- endmacro %}
+
+
+<!-- UPDATE PROFILE FORM -->
+{% macro accountForm(form) -%}
+  <form 
+    hx-patch="{{ url_for('account_update') }}"
+    hx-target="#messages"
+    hx-swap="innerHTML"
+    novalidate
+    class="">
+
+    <div class="grid grid-cols-1 gap-y-4 gap-x-2 w-fit min-w-[500px]  rounded-md
+    border border-solid border-slate-300">
+
+    
+
+      {% for field in form %} 
+
+        {% if field.type != 'SubmitField' %}
+          <div class="px-2
+          {% if loop.index != 2 %}
+            border-t border-solid border-slate-30 pt-4
+          {% endif %}">
+           {{ customInput(field,true) }} 
+
+          </div>
+
+        {% endif %}
+
+      {% endfor %}
+
+    <div class="flex justify-between text-sm pt-4 border-t border-solid border-slate-300 p-4">
+      <div class="flex flex-col">
+          <span class="font-bold "> Reset Password </span>
+          <span>••••••••••</span>
+      </div>
+      <span hx-target="#modal-bg" hx-swap='outerHTML' hx-trigger='click' hx-get="{{ url_for('reset_password') }}">
+         {{ customButton('Edit', color='white', hoverColor='gray-300', classes='border border-solid border-slate-300 text-sm ml-auto')}}
+      </span>
+    </div>
+
+  </div>
+
+    <span class="w-fit flex items-start mt-4 text-xs">
+      {{ customInput(form.update) }} 
+  </span>
+  </form>
+
+{%-endmacro %}
+
+
+
+<!--CSERV FORM -->
+{% macro CServForm(form) -%}
+  <form 
+    action="{{ url_for('account_cserv_submit') }}"
+    hx-target="#messages"
+    hx-swap="innerHTML"
+    enctype="text/plain"
+     method="POST"
+     hx-push-url="false"
+    class="">
+
+    <div class="grid grid-cols-1 gap-y-4 gap-x-2 w-fit min-w-[500px]  rounded-md
+    border border-solid border-slate-300">
+
+      {% for field in form %} 
+
+        {% if field.type != 'SubmitField' %}
+          <div class="px-2
+          {% if loop.index != 2 %}
+            border-t border-solid border-slate-30 pt-4
+          {% endif %}">
+           {{ customInput(field,true) }} 
+
+          </div>
+
+        {% endif %}
+
+      {% endfor %}
+
+  </div>
+
+    <span class="w-fit flex items-start mt-4 text-xs">
+      {{ customInput(form.send_message) }} 
+  </span>
+  </form>
+
+{%- endmacro %}
+
+<!-- RESET PASSSWORD FORM -->
+{% macro resetPasswordForm(form) -%}
+  <form 
+    novalidate
+  class="content">
+
+    <div class="grid sm:grid-cols-1 gap-y-12 gap-x-2 p-4  rounded-md">
+
+      {% for field in form -%} 
+      {{ customInput(field) }}
+    {% endfor -%}
+    </div>
+
+
+    <span 
+      hx-post="{{ url_for('reset_password') }}"
+      hx-target="#messages"
+      hx-trigger="click"
+      hx-swap="innerHTML">
+      {{ customButton('Reset Password', classes='w-fit self-center mt-3', as_submit=false)}}
+
+    </span>
+  </form>
+
+  <script>
+    handleCustomInputs()
+  </script>
+
+{%- endmacro %} 
+
+<!-- Create Edit  Delete Address -->
+{% macro ceAddr(form, update) %}
+<form
+class="grid sm:grid-cols-2 gap-y-4 gap-x-2 content"
+>
+
+  {% for field in form %} 
+    {% if field.type != 'SubmitField' %}
+      {{ customInput(field, field.id in ['line1','city']) }} 
+    {%else%}
+
+      <span
+        {% if update== 'edit' %}
+          hx-patch="{{ url_for('account_address_crud', update=update) }}"
+        {% else %}
+        hx-post="{{ url_for('account_address_crud', update=update) }}"
+        {% endif %}
+        hx-include="closet form"
+        novalidate
+        hx-trigger="click"
+        hx-target="#messages"
+        hx-swap="innerHTML"
+        class="col-span-full"
+        >
+
+        {% if update== 'edit' %}
+          {% set btitle =  field.label.text + ' Changes' %}
+        {%else%}
+          {% set btitle =  field.label.text %}
+        {% endif %}
+        {{customButton(btitle)}}
+
+      </span>
+      {% endif %}
+    {% endfor %}
+
+  {% if update=='edit' %}
+    <input type="hidden" name="address" value="{{ form.address_id }}">
+{% endif %}
+
+</form>
+{% endmacro %}
+
+{% macro ceAddrAnon(form, update) %}
+<form id="addr-anon"
+class="grid sm:grid-cols-3 gap-y-4 gap-x-2 content"
+>
+
+      <a href="{{ url_for('account_address') }}" class="col-span-full">
+        {{customButton('Sign in or see your addresses')}}
+      </a >
+
+      <div class="w-full relative  border-b-2 border-b-solid border-b-slate-200 my-6 col-span-full">
+        <span class="bg-white px-4 text-xs text-slate-400 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">  or enter a zip code</span>
+      </div>
+
+      <span class="col-span-2">{{ customInput(form.zip_code, ) }} </span>
+
+      <span
+        hx-post="{{ url_for('account_address_anon', update='add') }}"
+        hx-include="closet form"
+        novalidate
+        hx-trigger="click"
+        hx-target="#modal-bg"
+        hx-swap="outerHTML"
+        class="col-span-1 flex items-center"
+        >
+        {{customButton('Add a Location', color='white', hoverColor='slate-200', 
+        classes='border border-solid border-gray-200 text-sm') }}
+      </span>
+
+      <div class="w-full relative  border-b-2 border-b-solid border-b-slate-200 my-6 col-span-full">
+        <span class="bg-white px-4 text-xs text-slate-400 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">  or </span>
+      </div>
+
+      <span class="col-span-full">
+      {% include 'components/countries.html' %}
+      </span>
+
+
+</form>
+<script>
+handleAddrAnonForm();
+</script>
+{% endmacro %}
+
+{% macro delAddr(address) %}
+<form class="flex flex-col content flex-wrap">
+  <span class="font-bold">{{current_user.fname}} {{current_user.lname}}</span>
+  <span>{{ address.line1 }}</span>
+  <span>{{ address.city }},{{ address.zip_code }}</span>
+  <span>{{  address.country }}</span>
+
+  <div class="text-sm grid break-words py-4 text-gray-400">
+    <span>Are you sure you want to remove this address?</span>
+    <span>Pending orders for this address will still be shipped to this address</span>
+  </div>  
+  <div class="flex justify-around">
+    <span hx-get="{{ url_for('close_modal') }}" hx-trigger="click" hx-target="#modal-bg" hx-swap="outerHTML">
+      {{ customButton('Cancel', classes="!text-sm") }}
+    </span>
+
+    <span hx-delete="{{ url_for('account_address_crud', update='remove') }}" hx-trigger="click" hx-include="closest form">
+      {{ customButton('Confirm Delete', classes='!text-sm ml-auto') }}
+    </span>
+  </div>
+  <input type="hidden" name="address" value="{{ address.id }}">
+</form>
+{% endmacro %}
+
+{% macro delFave(address) %}
+
+<div class="flex flex-col content flex-wrap">
+
+  <div class="text-sm grid break-words py-4 text-gray-400">
+    <span  >Are you sure you want to remove this product from your favvourites?</span>
+  </div>  
+  <div class="inline-flex">
+    {{ customButton('Cancel', classes='') }}
+    {{ customButton('Confirm Delete',classes='!p-1 !text-sm ml-auto')}}
+  </div>
+</div>
+
+{% endmacro %}
+
+<!-- TEXT COUT FOR TEXT AREAS -->
+{% macro textCount(field, max) -%}
+  <span class="text-xs text-slate-400 flex"><span id="count">{% if field.data %}
+    {{ field.data | length }} {%else%} 0
+  {% endif %}</span>/{{ max }}</span>
+
+  <script>
+    var max_value = parseInt("{{ max }}");
+    updateLength(max_value);
+  </script>
+{%- endmacro %}
+
+

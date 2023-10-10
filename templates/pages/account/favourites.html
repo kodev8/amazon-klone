@@ -1,0 +1,114 @@
+{% extends 'templates/account.template.html' %}
+{% from 'components/amazon.html' import customButton %}
+{% from './components/notifs.html' import oob_notif %}
+
+
+{% block account_content %}
+
+{% if message_only %}
+
+{{ oob_notif(message_only, type, link) }}
+
+
+{% else %}
+  
+
+    <div class="flex flex-col">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div class="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Item
+                                </th>
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Category
+                                </th>
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Favorited On
+                                </th>
+                                <th scope="col" class="relative py-3.5 px-4">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody  id="favourites-table"  hx-swap="true" class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+
+                            {% if current_user.favourites | length > 0 -%}
+                                    {% for fave in current_user.favourites -%}
+                                    <tr>
+                                        <form>
+                                            <td class="px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
+                                                
+                                                <a href="{{ url_for('product', product=fave.product._id) }}" hx-target="#page-content" hx-select="#page-content" >
+                                                    {{ fave.product.title[:25]}}{% if fave.product.title|length > 25  %}...{% endif %}
+                                                </a>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                                                {{ fave.product.category_display }}
+                                            </td>
+                                            
+                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">{{ fave.favourited_at }}</td>
+                                            <td class="px-4 py-4 text-sm whitespace-nowrap">
+                                                <div class="flex items-center gap-x-6">
+
+                                                    <span  hx-post="{{ url_for('checkout-single') }}" hx-include="next .info-row" hx-target="body" hx-push-url="true">
+                                                        {{ customButton('Buy Now', color='orange-400', hoverColor='orange-600', classes='text-xs') }}
+                                                    </span>
+
+                                                    <span hx-delete="{{ url_for('account_favourites') }}" 
+                                                    hx-select="#favourites-table"
+                                                    hx-target="#favourites-table"
+                                                    hx-swap="outerHTML"
+                                                    hx-trigger="click" 
+                                                    hx-include="next [name=product]">
+                                                        <i class="fa-solid fa-trash-can text-red-500 cursor-pointer"></i>
+                                                    </span>
+
+                                                    <span class="info-row">
+                                                        <input type="hidden" name="product" value="{{fave.product._id}}">
+                                                        <input type="hidden" name="qty" value="1">
+                                                    </span>
+                                                   
+
+
+                                                </div>
+                                            </td>
+
+                                        </form>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <tr>
+                                    <td colspan="100%">
+                                        <div class="flex items-center justify-center p-6">
+                                            No favourite products yet!
+                                        </div>
+                                    </td>
+                                        
+                                </tr>
+                            {% endif %}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if message %}
+        {{ oob_notif(message, type, link) }}
+    {% endif %}
+
+{% endif %}
+
+
+ 
+
+{% endblock account_content %}

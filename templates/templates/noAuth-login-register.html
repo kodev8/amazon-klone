@@ -1,0 +1,31 @@
+{% extends 'templates/noAuth.html' %} 
+
+  {% block no_auth_content %}
+
+  <div
+    class="flex flex-col flex-1 h-full w-fit items-center justify-center"
+  >
+
+
+  {% if request.referrer %}
+
+    {% set back_to = request.referrer  %}
+    
+  {% else %}
+
+    {% set back_to = url_for('index')  %}
+  {% endif %}
+
+    <a hx-boost='false' href="{{ back_to }}" class="absolute top-4 left-4">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span class="underline pl-2">Back</span>
+    </a>
+
+    {% block bottom_content %} 
+
+
+    
+    {% endblock bottom_content %}
+  </div>
+
+{% endblock no_auth_content %}

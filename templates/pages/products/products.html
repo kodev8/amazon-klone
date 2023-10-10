@@ -1,0 +1,185 @@
+{% extends 'templates/layout.html' %} 
+{% from './components/amazon.html' import star, productPrice, productStars %}
+
+
+{% block page_content -%}
+
+
+
+<div id="product-filter" class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] w-full h-full">
+    <div class="col-span-full py-2 px-3 bg-white border-b border-b-solid z-10 border-slate-200"
+    style="box-shadow: 0px 1px 3px 1px rgb(204, 200, 200);"
+    >
+        <span id="products-results-count" class="font-bold">{{ products | length}} </span> result(s)
+    </div>
+    
+    
+    <div class="max-w-[250px] bg-white flex flex-col justify-start pl-4 gap-y-4 pt-8">
+        <div id='product-rating-filter'class="flex flex-col gap-y-2">
+            <span class="font-bold text-xl">Rating</span> 
+              <!-- filter by rating  -->
+            {% for count in range(4, 0, -1)  -%}
+            <form
+            {% if star_underline == count -%}
+                class="border-b border-solid border-yellow-500 w-fit"   
+            {%- endif %}
+            id="rating{{count}}"
+            hx-get="{{ url_for(request.endpoint, **request.args | filter_args('rating_gt')) }}"
+            hx-trigger="click from:find .filter"
+            hx-target="#products-results" 
+            hx-select="#products-results"
+            hx-swap="outerHTML"
+
+            hx-select-oob="#product-filter"
+            hx-push-url="true"
+            >
+                <input type="hidden" name="rating_gt" value="{{count}}">
+                <span class="filter text-sm hover:text-yellow-500 
+                {% if star_underline == count -%}
+                text-yellow-500"   
+                {%- endif %}
+                cursor-pointer">
+                {% for i in range(5)  -%}
+                    <span>
+                        {{ star(filled=i < count) }}
+                    </span>
+                {%- endfor %}
+                    <span class="text-sm">& Up</span> 
+                </span>
+            </form>
+            {%- endfor %}
+        </div>
+        <!-- filter by price range -->
+        <div id='product-price-filter' hx-swap='true'  class="grid">
+            <span class="font-bold text-xl">Price</span>
+            {% for price_range in price_ranges  -%}
+                <form
+                id="price-f{{loop.index}}"
+                hx-get="{{ url_for(request.endpoint, **request.args | filter_args('price_max', 'price_min')) }}"
+                hx-trigger="click from:find .filter"
+                hx-target="#products-results" 
+                hx-select="#products-results" 
+                hx-swap="outerHTML"
+
+                hx-select-oob="#product-filter"
+                hx-push-url="true" 
+                class="w-fit"
+                >
+                    <span class="filter cursor-pointer hover:text-yellow-500 {% if price_range['active'] == true %}
+                        text-yellow-500
+                    {% endif %}">{{ price_range['display']}}</span>
+                    {% if price_range.get('min') -%}
+                    <input type="hidden" name="price_min" value="{{price_range.get('min') | int}}">
+                    {%- endif %}
+                    {% if price_range.get('max') -%}
+                    <input type="hidden" name="price_max" value="{{price_range.get('max') | int}}">
+                    {%- endif %}
+                </form>
+            {% endfor -%}
+
+            <!-- filter by price range form -->
+            <form
+            id="price-f5"
+            hx-get="{{ url_for(request.endpoint, **request.args | filter_args('price_max', 'price_min')) }}"
+            hx-target="#products-results" 
+            hx-select="#products-results" 
+            hx-swap="outerHTML"
+
+            hx-select-oob="#product-filter"
+            hx-push-url="true" 
+            hx-trigger="submit"
+            class="w-fit"
+            >
+            <div class="text-sm flex justify-evenly gap-x-2">
+
+                <div class="flex w-fit border border-gray-500 border-solid rounded-lg p-2">
+                    <span class="">$</span>
+                    <input type="number" maxlength="9" id="price_min" placeholder="Min" name="price_min" class="outline-none border-none w-full"
+                    {% if auto_fill %}
+                        value="{{request.args.get('price_min') }}"
+                    {% endif %}
+                    >
+                </div>
+
+                <div class="flex w-fit border border-gray-500 border-solid rounded-lg p-2 ">
+                    <span class="">$</span>
+                    <input type="number" maxlength="9" id="price_max" placeholder="Max" name="price_max"  class="outline-none border-none w-full"
+                    {% if auto_fill -%}
+                        value="{{request.args.get('price_max') }}"
+                    {%- endif %}>
+                </div>
+                <input type="submit" class="flex border border-gray-500 border-solid rounded-lg p-2 w-fit mr-2 hover:bg-gray-100 cursor-pointer" value="Go">
+            </div>
+            </form>
+        </div>
+        <span 
+        
+            hx-get="{{ url_for(request.endpoint, **request.args | filter_args('price_max', 'price_min', 'rating_gt', 'q')) }}"
+            hx-target="#products-results" 
+            hx-select="#products-results" 
+            hx-swap="outerHTML"
+
+            hx-select-oob="#product-filter"
+            hx-push-url="true" 
+            hx-trigger="click"
+            onclick="document.querySelector('#search-bar').value=''"
+        >
+            {{customButton('Reset Filters', classes='!p-1 text-sm')}}
+        </span>
+
+    </div>
+
+    {% if products and products | length > 0 -%}
+   <!-- Results -->
+
+    <div id="products-results" class="grid pr-2 pt-4 products-container gap-2 bg-white pb-8">
+
+        {% for product in products -%}
+
+            <div class="h-full flex flex-col justify-start border border-gray-100 border-solid rounded-sm">
+                <a href="{{ url_for('product', product=product._id) }}" hx-target="#page-content" hx-select="#page-content" class="bg-gray-100 h-[200px] aspect-auto p-3">
+                    <img src="{{ product.thumbnail }}" alt="" class=" h-full mx-auto mix-blend-multiply">
+                </a>
+
+                <div class="p-4 grid gap-y-1">
+                    <a href="{{ url_for('product', product=product._id) }} " hx-target="#page-content" hx-select="#page-content" class="text-lg hover:text-orange-500" >{{ product.title}} </a>
+
+                    <span class="rating-container cursor-pointer relative w-fit">
+                        {{ productStars(product) }}
+                        <div class="rating invisible speech-bubble sb-center sb-outline right-0 mt-2 !p-1">
+                        <!-- <div class=" rating speechabsolute top-[110%] left-[50%] bg-white p-2 border border-solid border-gray-200 shadow-2xl hidden font-medium"> -->
+                            <span>{{ product.rating }}</span>
+                        </div>
+                    </span>
+
+                    <a href="{{ url_for('product', product=product._id) }}" hx-target="#page-content" hx-select="#page-content" >
+                        {{ productPrice(product) }}
+                    </a>
+
+                </div>
+                <span class="p-4 my-auto text-sm">
+                    Delivers to
+                    {% if current_user.is_authenticated and current_user.addresses|length > 0 -%}
+                        {{current_user.addresses[0].country}}
+                    {% elif current_user.is_anonymous and session.get('address') and session.get('address').get('city') %}
+                        {{session.get('address').get('city') }}
+                    {% else %}
+                        France
+                    {%- endif %}
+                    
+                     
+
+                    
+                </span>
+            </div>
+        {%- endfor %}
+    </div>
+    {% else %}
+    <div id="products-results" class="flex flex-col bg-white items-center justify-start p-6">
+        <span class="text-2xl font-bold"> Unfortunately we could not find any results for your search...</span>
+        <span class="text-xl font-medium"> Try filtering by category or using keywords!</span>
+    </div>
+    {%- endif %}
+</div>
+
+{%- endblock page_content %}

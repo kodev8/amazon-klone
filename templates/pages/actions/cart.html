@@ -1,0 +1,101 @@
+{% extends 'templates/layout.html' %}
+{% from 'components/amazon.html' import star, productPrice, 
+customButton, productQty, cartProduct, suggestedProduct %}
+
+
+{% block page_content %}
+
+<div id="cart-page" class="grid grid-cols-[1fr_auto] gap-8 p-8 justify-center">
+
+<div class="h-full flex flex-col">
+
+    <div class="bg-white border border-gray-200 shadow-sm p-6">
+
+        <!-- cart header -->
+        {% if cart_products | length > 0 %}
+
+        <div class="flex flex-col items-start pb-4 border-b border-b-solid border-slate-300 gap-y-4">
+
+
+            <span class="text-4xl">
+                Shopping Cart
+            </span>
+            <span id="subtotal-message"></span>
+        </div>
+
+        <!-- cart items -->
+        <div class="flex flex-col  ">
+
+                {% for product in cart_products  %}
+                    {{ cartProduct(product) }}
+                {% endfor %}
+        </div>
+
+        <div class="flex justify-end text-lg">
+            <span hx-post="{{ url_for('selected_subtotal') }}" hx-swap="outerHTML" hx-target="this" hx-trigger="load"
+            id="center-subtotal"
+            class="subtotal" >
+            </span>
+
+        </div>
+
+        {% else %}
+
+            <!-- no products -->
+        <div class="flex p-4">
+
+            <img src="{{ url_for('static', filename='assets/empty_cart.svg') }}" class="max-h-[100px] w-auto">
+            <div class="flex flex-col items-start pl-8 justify-center">
+                <span class="text-4xl font-medium">Your cart is empty</span>
+                <span><a hx-boost='false' href= "{{ url_for('index') }}" class="text-blue-400 underline">Continue shopping</a> to add more items to your Cart!</span>
+            
+
+                {% if current_user.is_anonymous %}
+                <div class="flex pt-4 gap-x-4">
+
+                    <a href="{{ url_for('login') }}">
+                        {{customButton('Sign in to your account', classes='p-1')}}
+                    </a>
+
+                    <a href="{{ url_for('register') }}">
+                        {{ customButton('Sign up now', color='white', hoverColor ='slate-200', classes='border border-solid border-slate-400') }}
+                    </a>
+
+                </div>
+                
+
+                {% endif %}
+
+
+            </div>
+        </div>
+       
+
+        {% endif %}
+
+
+    </div>
+
+    </div>
+
+    <!-- side dispalu -->
+    <div class="flex flex-col">
+        {% if cart_products | length > 0 %}
+            <div id="side-subtotal" class="absolute"></div>
+        {% endif %}
+        <div class="
+        {% if not suggested or suggested | length <= 0 %} opacity-0 {% endif %}
+        bg-white rounded-sm border border-solid border-slate-300 p-4 w-64 h-fit flex flex-col gap-y-8" >
+            <span class="font-bold"> Featured items you may like</span>
+            {% for product in suggested  %}
+                {{ suggestedProduct(product) }}
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+
+
+    
+{% endblock page_content %}

@@ -1,0 +1,72 @@
+ {% extends 'templates/layout.html' %} 
+
+{% block page_content %}
+
+<div id='carousel' class="carousel h-screen w-full absolute flex justify-between z-[1]">
+
+  <div id="controls-carousel" class=" relative h-screen w-full" 
+  data-carousel="static">
+    <!-- Carousel wrapper -->
+         <!-- Item 1 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <img src="{{ url_for('static', filename='assets/carousel/c1.jpg') }}" class="absolute w-full" alt="...">
+        </div>
+        <!-- Item 2 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item="active">
+            <img src="{{ url_for('static', filename='assets/carousel/c2.jpg') }}" class="absolute w-full" alt="...">
+        </div>
+        <!-- Item 3 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <img src="{{ url_for('static', filename='assets/carousel/c3.jpg') }}" class="absolute w-full" alt="...">
+        </div>
+
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+          <img src="{{ url_for('static', filename='assets/carousel/c4.jpg') }}" class="absolute w-full" alt="...">
+      </div>
+
+      <div class="hidden duration-700 ease-in-out" data-carousel-item>
+        <img src="{{ url_for('static', filename='assets/carousel/c5.jpg') }}" class="absolute w-full" alt="...">
+    </div>
+      
+    <!-- Slider controls -->
+    <button type="button" class="absolute top-0 left-0 z-30 flex mt-[30vh] justify-center px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-black/30 dark:bg-gray-800/30 group-hover:bg-black/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-slate-300 dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+            <svg class="w-4 h-4 text-white dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+            </svg>
+            <span class="sr-only">Previous</span>
+        </span>
+    </button>
+    
+    <button type="button" class="absolute top-0 right-0 z-30 flex mt-[30vh] justify-center px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-black/30 dark:bg-gray-800/30 group-hover:bg-black/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-slate-300 dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+            <svg class="w-4 h-4 text-white dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <span class="sr-only">Next</span>
+        </span>
+    </button>
+
+  <div class="gradient-overlay"></div>
+
+  </div>
+
+</div>
+
+
+
+<div class="grid gap-6 m-8 results-container z-10  mt-[40vh] relative">
+
+  {% for category in categories -%}
+
+      <div class=" h-50 w-fll bg-white p-6 flex flex-col">
+        <span class="font-bold text-2xl">{{ category.title.title() }} </span>
+          <img src="{{ category.cover  }}" class="max-h-full w-auto" alt="">
+        <a  href="{{ url_for('get_products', category=category.key) }}" hx-target="#page-content" hx-select="#page-content" class="text-xs mt-auto mb-4 text-blue-400 hover:text-blue-700">Shop now</a>
+      </div>
+    
+  {%- endfor %}
+
+</div>
+
+{% endblock page_content %}

@@ -1,0 +1,43 @@
+{% extends './templates/layout.html' %}
+
+{% block page_content %}
+
+<div class="w-full h-full flex justify-center bg-white">
+
+  <div class="mx-auto p-2 max-w-[1000px] bg-white"> 
+
+    <span class="w-full">
+      <a href="{{ url_for('account') }}"  class="hover:underline hover:text-yellow-600
+      {% if title %}text-xs{%else%}text-2xl my-4 {% endif %}">
+        Your Account
+      </a> 
+    
+        {% if title %}
+
+      
+          <i class="fa-solid fa-chevron-right text-[8px] my-auto"></i> 
+          <span class="text-xs text-orange-400">
+                {{title}}
+          </span>
+
+        {% endif %}
+    </span>
+
+    <h4 class="text-xl font-medium text-black col-span-full w-fit my-4">
+      {{title}}
+    </h4>
+
+
+
+    {% block account_content %}
+
+    
+      
+    {% endblock account_content %}
+
+  </div>
+
+</div>
+  
+{% endblock page_content %}
+

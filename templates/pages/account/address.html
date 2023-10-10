@@ -1,0 +1,31 @@
+
+
+{% extends 'templates/account.template.html' %}
+{% from 'components/amazon.html' import accountAddress with context %}
+
+
+{% block account_content %}
+
+<div class="grid grid-cols-[1fr_1fr_1fr] gap-4">
+
+    <div hx-get="{{ url_for('account_address_get', update='add') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click"
+    class="border border-dashed border-slate-500 basis-4/12 flex items-center justify-center p-14 hover:bg-gray-100 cursor-pointer
+     rounded-2xl">
+      <div class="flex flex-col text-4xl items-center ">
+        <span><i class="fa-solid fa-plus text-gray-200"></i></span>
+        <span class="text-gray-700 text-3xl font-medium">
+          Add Address
+        </span>
+      </div>
+    </div>
+
+    {% for address in  current_user.addresses %}
+
+        {{accountAddress(address)}}
+        
+    {% endfor %}
+
+</div>
+
+    
+{% endblock account_content %}

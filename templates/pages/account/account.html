@@ -1,0 +1,91 @@
+{% extends 'templates/account.template.html' %}
+
+    {% block account_content %}
+
+
+    <div class="grid grid-cols-[1fr_1fr_1fr] gap-4">
+
+      <a href="{{ url_for('account_orders') }}" class="border border-solid border-slate-300 basis-4/12 flex p-4 rounded-2xl hover:bg-gray-300">
+        
+        <div>
+          <img src="{{ url_for('static', filename='assets/accounts/orders.png') }}" class="max-w-[50px] h-auto mr-4">
+        </div>
+        
+        <div class="flex flex-col">
+          <span>Your Orders</span>
+          <span>
+            Track, return, cancel an order, download invoice or buy again
+          </span>
+        </div>
+
+      </a>
+
+
+      <a href="{{ url_for('account_update') }}" class="border border-solid border-slate-300 basis-4/12 flex p-4 rounded-2xl hover:bg-gray-300">
+        
+        <div>
+          <img src="{{ url_for('static', filename='assets/accounts/login_sec.png') }}" class="max-w-[50px] h-auto mr-4">
+        </div>
+        
+        <div class="flex flex-col">
+          <span>Login & security</span>
+          <span>
+            View, modify, and share your lists, or create new ones
+          </span>
+        </div>
+
+      </a>
+
+      <a href="{{ url_for('account_address') }}" class="border border-solid border-slate-300 basis-4/12 flex p-4 rounded-2xl hover:bg-gray-300">
+        
+        <div>
+          <img src="{{ url_for('static', filename='assets/accounts/acc.png') }}" class="max-w-[50px] h-auto mr-4">
+        </div>
+        
+        <div class="flex flex-col">
+          <span>Your Addresses</span>
+          <span>
+              Edit, remove or set default address
+          </span>
+        </div>
+
+      </a>
+
+
+      <a href="{{ url_for('account_cserv') }}" class="border border-solid border-slate-300 basis-4/12 flex p-4 rounded-2xl hover:bg-gray-300">
+        
+        <div>
+          <img src="{{ url_for('static', filename='assets/accounts/cserv.png') }}" class="max-w-[50px] h-auto mr-4">
+        </div>
+        
+        <div class="flex flex-col">
+          <span>Customer Service</span>
+          <span>
+            Browse self service options, help articles or contact us
+          </span>
+        </div>
+
+      </a>
+
+      <a href="{{ url_for('account_favourites') }}" class="border border-solid border-slate-300 basis-4/12 flex p-4 rounded-2xl hover:bg-gray-300">
+        
+        <div>
+          <img src="{{ url_for('static', filename='assets/accounts/lists.png') }}" class="max-w-[50px] h-auto mr-4">
+        </div>
+        
+        <div class="flex flex-col">
+          <span>Your Favorites</span>
+          <span>
+              Edit, remove or view from your favorites list
+          </span>
+        </div>
+
+      </a>
+    </div>
+
+
+    </div>
+      
+    {% endblock account_content %}
+
+  

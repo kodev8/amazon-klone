@@ -1,0 +1,463 @@
+<!-- side nav tab
+hx-get="{{ url_for('get_categories' , with_state=request.endpoint=='get_products' )}}" hx-target="#search-cat" hx-swap="beforeend" hx-trigger="load"
+    id="search-results-container" hx-swap-oob="true"  -->
+{% macro sideTab(icon, text) -%}
+
+<div
+  class="w-fit sm:w-full flex items-center justify-start text-xl p-4 bg-white rounded-full hover:bg-slate-200 cursor-pointer"
+>
+  <i class="{{ icon }} text-slate-600 mx-4 "></i>
+  <span class="hidden sm:block">{{ text }}</span>
+</div>
+
+{%- endmacro %} 
+
+
+<!-- search bar -->
+{% macro searchBar() -%}
+
+<!-- placed out of form to avoid interferrence -->
+<input type="hidden"  
+hx-get="{{ url_for('get_categories', active_category=request.args.get('category') )}}" hx-target="#search-cat" hx-swap="beforeend" hx-trigger="load"
+>
+
+<!-- targets the content of the page to swap async only when already-->
+<form 
+method="GET"
+hx-target="#page-content"
+hx-select="#page-content"
+hx-swap="outerHTML show:window:top"
+action="{{ url_for('get_products') }}"
+class="flex items-center relative search  rounded-md">
+
+    <select 
+    id="search-cat"
+    name="category"
+    class="bg-gray-200 border-[3px] border-solid text-slate-700 text-xs h-12 px-2 focus:border-yellow-500 rounded-l-md w-20">
+    <option value="" >All</option>
+  </select>
+
+    <div class="relative flex items-center w-full">
+      <input
+      onfocus="this.closest('form').classList.add('outline', 'outline-yellow-500')"
+      onblur="this.closest('form').classList.remove('outline',  'outline-yellow-500')"
+      hx-get="{{ url_for('search') }}"
+      hx-target="#search-results-container"
+      hx-trigger="keyup changed delay:500ms"
+      hx-swap="innerHTML"
+      autocomplete="off"
+      name="q"
+      id="search-bar"
+      placeholder="Search on amazon"
+      {% if request.args.get("q")  -%}
+        value="{{request.args.get('q')}}"
+      {%- endif %}
+      class="border-none outline-none text-black bg-transparent w-full bg-white h-12 px-2"
+    />
+    <button>
+      <i class="fa-solid fa-magnifying-glass text-black ml-auto cursor-pointer  rounded-r-md
+    bg-yellow-300 hover:bg-yellow-500 text-2xl h-12 p-2 px-3"></i>
+    </button>
+    
+    
+    <div id="search-results-container"
+    class="absolute  left-0 w-full z-10 top-[99%] bg-white text-black  shadow-2xl
+    ">
+    </div>
+
+  </div>
+</form>
+
+<!-- hx-get="{{ url_for('get_categories' , with_state=request.endpoint=='get_products' )}}" hx-target="#search-cat" -->
+{%- endmacro %} 
+
+<!-- SEARCH PRODUCTS -->
+{% macro searchProducts(product) -%}
+  <a  href="{{ url_for('product', product=product.get('_id')) }}" hx-target="#page-content" hx-select="#page-content" 
+      class="font-medium text-md pl-4 hover:bg-gray-200 py-3 flex w-full">
+    {{product.get('title')}} <span class="ml-2 text-sm font-light"> | {{product.category_display}}
+    </span> 
+  </a>
+{%- endmacro %}
+
+<!-- STAR -->
+
+{% macro star(filled=true, halved=false) -%}
+
+{% if halved -%}
+<i class="fa-solid fa-star-half-stroke text-yellow-500"></i>
+{% else %}
+  <i class="
+  {% if filled -%}
+      fa-solid 
+  {% else %}
+      fa-regular
+  {%- endif %}
+  fa-star text-yellow-500">
+  </i> 
+{%- endif %}
+    
+      
+{%- endmacro %}
+
+<!-- produc price -->
+{% macro productPrice(product) -%}
+
+<span class="inline-flex items-start mt-2">
+  <span class="text-sm leading-[10px] mr-[1px]">$</span>
+  <span class="text-3xl font-medium leading-[15px]">{{product.get('price_display')}}</span>
+  <span class="text-sm leading-[10px] ml-[1px]">{{ product.get('decimal') }}</span>
+</span>
+  
+{%- endmacro %}
+
+<!-- product stars for handling half stars -->
+{% macro productStars(product) -%}
+
+{% set whole, half, remain = product.handle_starred()  %}
+  {% for w_star in  range(whole) -%}
+    {{star()}}
+  {% endfor %}
+
+  {% if half == true -%}
+    {{star(halved=true)}}
+  {%- endif %}
+
+  {% for r_star in  range(remain) -%}
+    {{star(filled=false)}}
+  {%- endfor %}
+
+{%- endmacro %}
+
+
+<!-- product stock -->
+{% macro productStock(product, size='lg') -%}
+
+  {% if product.get('stock', 0) > 9 -%}
+  <span  class="text-green-600 font-medium text-{{size}}">In Stock</span>
+  {% elif product.get('stock', 0) > 0 %}
+  <span class="text-orange-300 font-medium text-{{size}}">Last Stock remaining:<span> {{ product.get('stock', 0) }}</span></span>
+  {% else %}
+  <span class="text-red-500 font-medium text-{{size}}">Out of stock</span>
+
+  {%- endif %}
+
+{%- endmacro %}
+
+
+<!-- product qantity -->
+{% macro productQty(product, oncart=false) -%}
+
+  {% if product.get('stock', 0) > 0 -%}
+<input type="hidden" name="product" value="{{product.get('_id')}}"></input>
+
+
+                    
+    {% if product.get('stock', 0) > 9 -%}
+
+      {% set max = 10 %}
+            
+    {% else %}
+
+        {% set max = product.get('stock')%}
+        
+    {%- endif %}
+      
+    <!-- https://stackoverflow.com/questions/899148/html-select-option-separator -->
+    {% if not oncart or (oncart and product.get('qty') < 10) -%}
+
+        <div class="w-fit h-fit pl-1 pr-3 flex items-center rounded-xl text-xs border border-solid border-gray-400 bg-gray-200 relative">
+
+          <span class="mr-8">Qty: </span>
+
+          <!-- refer to cart product form -->
+          <select onfocus="this.closest('div').classList.add('outline', 'outline-blue-500');"
+                  onblur="this.closest('div').classList.remove('outline', 'outline-blue-500')"
+                  name="qty"
+                  
+                  class="absolute bg-transparent w-full left-0 " style="text-align-last:right;" >
+            <!-- to display also as selected -->
+
+              {% for i in range (1, max+1) -%}
+
+                {# display the user qty in cart but not on base product page #}
+                {% if i  == product.get('qty') and oncart -%}
+                    <option selected value="{{i}}">{{i}}</option>
+
+                {% else %}
+                <option value="{{i}}">{{i}} </option>
+
+                {%- endif %}
+
+                
+              {% endfor %}
+
+              {% if max==10 and oncart -%}
+                <option class="text-[1px] bg-black" disabled>&nbsp;</option>
+                <option value="10+">10+</option>
+              {%- endif %}
+                    
+          </select>
+        </div>
+
+
+      {% else %}
+          <!-- for values grater than 10 -->
+
+        <div class="inline-flex w-fit gap-x-3">
+          <input class="outline outline-blue-300 rounded-md pl-2" type="number" name="qty" min="0" max="{{product.get('stock')}}" value="{{product.get('qty')}}">
+          {{ customButton('Update', classes='text-xs !py-1 !px-4', as_submit=false)}}
+        </div>
+      {%- endif %}
+  {%- endif %}
+    
+  
+{%- endmacro %}
+
+<!-- cvent is the event from the rerendered button -->
+{% macro cartProduct(product) -%}
+
+{% set listener = "cvent, change from:find [name='selected']" %}
+
+{% if product.get('qty') > 10 -%}
+  {% set listener = listener +  ", click from:find button" %}
+{% else %}
+{% set listener = listener + ", change[selectQty(event)] from:find [name='qty']" %}
+{%- endif %}
+
+<form
+action="{{url_for('selected_subtotal', how='update')}}" 
+method="POST"
+hx-target="#center-subtotal" 
+hx-swap="outerHTML" 
+hx-trigger="{{listener}}"
+hx-push-url="false"
+>
+
+<div class="cart-product flex py-8 w-full gap-x-8 pb-6 border-b border-b-solid border-slate-300">
+  <!-- check box -->
+  <div class="flex items-center">
+
+
+      <input 
+      name="selected" type="checkbox" 
+      {% if product.selected -%}
+        checked
+      {%- endif %}>
+      <input type="hidden" name="product" value="{{ product.get('_id') }}">
+  </div>
+
+  <img src="{{ product.thumbnail }}" class="mix-blend-multiply max-h-[200px] w-auto" alt="">
+  <!-- </div> -->
+
+  <div class="flex flex-col gap-y-4">
+      <a  hx-target='#page-content' hx-select="#page-content" href="{{ url_for('product', product=product.get('_id')) }}" class="text-3xl hover:underline hover:text-blue-300">{{product.title}}</a>
+      <span class="font-bold texr-xl">${{product.get('price')}}</span>
+      <span>{{ productStock(product, size='sm') }}</span>
+
+      {{ productQty(product, oncart=true) }}
+
+      <div class="flex">
+          <span hx-delete="{{ url_for('cart_delete', product=product.get('_id')) }}" hx-swap="none"
+           class="text-xs text-red-600 px-2 border-r-2 border-solid  border-gray-200  cursor-pointer">
+              Delete
+          </span>
+          <span hx-post="{{ url_for('account_favourites')}}" hx-trigger="click" hx-include="closest form"  hx-swap="none"
+          class="text-xs text-yellow-600 px-2 border-r-2 border-solid  border-gray-200 cursor-pointer">
+              Add to Favourites
+          </span>
+          <span class="text-xs text-[var(--a-blue)] px-2  cursor-pointer">
+              Share
+          </span>
+      </div>
+
+  </div>
+</div>
+</form>
+{%- endmacro %}
+
+{% macro suggestedProduct(product) -%}
+
+  <form class="flex flex-1 break-word gap-x-4 gap-y-6">
+
+    <div class="flex-1">
+        <img src="{{ product.thumbnail }}" class="w-full h-auto" alt="">
+    </div>
+    <div class="flex-1 flex flex-col text-xs">
+        <a  href="{{ url_for('product', product=product.get('_id')) }}" class="hover:underline hover:text-yellow-500">{{ product.get('title') }}</a>
+        <span>{{ productStars(product)}}</span>
+        <span>${{product.get('price')}}</span>
+        
+        <span
+        hx-post="{{url_for('cart_add_suggested')}}"
+        hx-include="closest form"
+        hx-swap="none"
+        >
+            {{ customButton('Add to Cart', classes='text-xs !p-1', as_submit=false) }}
+        </span>
+        <input type="hidden" name="product" value="{{ product.get('_id') }}">
+
+
+    </div>
+
+  </form>
+  
+{%- endmacro %}
+
+<!-- CUSTOM BUTTON -->
+{% macro customButton(
+        text,
+        color='yellow-300',
+        hoverColor='yellow-500', 
+        icon=none, 
+        classes="text-black", 
+        as_submit=truem
+         ) 
+    -%}
+
+  <button
+    {% if not as_submit -%} type="button" {%- endif %} 
+    class="w-full col-span-full px-4 py-2 flex items-center justify-center rounded-xl bg-{{color}} {{ classes }} hover:bg-{{hoverColor}}"
+  >
+    {% if icon -%}
+    <i class="{{icon}} mr-4"></i>
+    {%- endif %}
+    <span class="font-medium">{{text}}</span>
+  </button>
+
+{%- endmacro %}
+
+
+<!-- ORDER STATUS -->
+
+{% macro orderStatus(status) -%}
+
+  {% if status=='completed' -%}
+
+  <div class="inline-flex items-center px-3 py-1 rounded-full gap-x-2 text-emerald-500 bg-emerald-100/60 dark:bg-gray-800">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <h2 class="text-sm font-normal">Completed</h2>
+  </div
+  
+  {% elif status == 'canceled' %}
+  
+    <div class="inline-flex items-center px-3 py-1 text-red-500 rounded-full gap-x-2 bg-red-100/60 dark:bg-gray-800">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+
+      <h2 class="text-sm font-normal">Cancelled</h2>
+  </div>
+
+  {% elif status=='pending' %}
+
+  <div class="inline-flex items-center px-3 py-1 text-yellow-700 rounded-full gap-x-2 bg-yellow-500/60 dark:bg-gray-800">
+    <i class="fa-solid fa-spinner"></i>
+
+    <h2 class="text-sm font-normal">Pending</h2>
+</div>
+    
+  {% elif status=='refunded' %}
+
+  <div class="inline-flex items-center px-3 py-1 text-gray-500 rounded-full gap-x-2 bg-gray-100/60 dark:bg-gray-800">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.5 7L2 4.5M2 4.5L4.5 2M2 4.5H8C8.53043 4.5 9.03914 4.71071 9.41421 5.08579C9.78929 5.46086 10 5.96957 10 6.5V10" stroke="#667085" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <h2 class="text-sm font-normal">Refunded</h2>
+</div>
+    
+  {%- endif %}
+  
+  
+{%- endmacro %}
+
+
+{% macro accountPagination() -%}
+
+
+<div class="flex items-center justify-between mt-6">
+  <a href="#" class="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+      </svg>
+
+      <span>
+          previous
+      </span>
+  </a>
+
+  <div class="items-center hidden md:flex gap-x-3">
+      <a href="#" class="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60">1</a>
+      <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">2</a>
+      <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">3</a>
+      <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">...</a>
+      <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">12</a>
+      <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">13</a>
+      <a href="#" class="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">14</a>
+  </div>
+
+  <a href="#" class="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800">
+      <span>
+          Next
+      </span>
+
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+      </svg>
+  </a>
+  
+</div>
+  
+{%- endmacro %}
+
+{% macro accountAddress(address) -%}
+
+<div class="border border-solid border-slate-500 basis-4/12 flex flex-col 
+rounded-2xl shadow-[4.0px_8.0px_8.0px_rgba(0,0,0,0.38)]"> 
+
+  {% if address.is_default -%}
+        <div class="border-b border-solid border-slate-500 px-3 py-1 flex items-center gap-x-4">
+            <span class="text-slate-400 text-xs">Default:</span>
+            <img class="h-[30px] aspect_auto mt-1 bg-transparent rounded-full" src="{{ url_for('static', filename='assets/logos/logo.png') }}" alt="">
+        </div>
+  {%- endif %}
+     <div class="flex flex-col p-3 ">
+         <span class="font-bold">{{current_user.fname}} {{current_user.lname}}</span>
+         <span>{{ address.line1 }}</span>
+         <span>{{ address.city }}, {{ address.zip_code }}</span>
+         <span>{{  address.country }}</span>
+     </div>
+        <form class="flex px-1 mt-auto pb-2">
+          <input type='hidden' name='address' value="{{address.id}}">
+
+            <span hx-get="{{ url_for('account_address_get', update='edit') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click" hx-include="closest form"
+            class="text-xs  text-[var(--a-blue)] px-2 border-r border-solid border-gray-200  cursor-pointer hover:underline">
+                Edit
+            </span>
+            <span hx-get="{{ url_for('account_address_get', update='remove') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click" hx-include="closest form"
+            class="text-xs  text-[var(--a-blue)] px-2 border-r border-solid border-gray-200 cursor-pointer hover:underline">
+                Remove
+            </span>
+          {% if not address.is_default %}
+            
+            <span hx-patch="{{ url_for('account_address_get', update='default') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click" hx-include="closest form"
+            class="text-xs text-[var(--a-blue)] px-2 border-gray-200 cursor-pointer hover:underline">
+              Set as default
+             </span>
+          {% endif %}
+            
+        </form>
+</div>
+{%- endmacro %}
+
+
+{% macro separator(colspan=none) %}
+<div class="
+col-span-{% if not colspan%}full{%else%}{{colspan}}{%endif%}
+border-t border-gray-400 border-solid my-2"></div>
+
+{% endmacro %}

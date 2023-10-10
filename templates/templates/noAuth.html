@@ -1,0 +1,26 @@
+{% extends 'templates/base.html' %} 
+
+{% block content %}
+
+
+<div class="h-full w-full flex flex-col ">
+
+
+  <div class="flex flex-col items-center justify-start">
+    <img class="h-[100px] aspect_auto  bg-transparent rounded-full" src="{{ url_for('static', filename='assets/logos/logo.png') }}" alt="">
+
+  {% block no_auth_content %}
+
+
+  {% endblock no_auth_content %}
+
+</div>
+
+  
+
+
+</div>
+<script type="text/javascript" src="{{url_for('static', filename='scripts/defer.js')}}" defer></script>
+
+
+{% endblock content %}

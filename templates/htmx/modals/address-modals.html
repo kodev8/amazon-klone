@@ -1,0 +1,15 @@
+{% from 'components/modal.html' import modalBG  %}
+{% from 'components/forms.html' import delAddr, ceAddr, ceAddrAnon,delFave, resetPasswordForm with context %}
+
+{% set swap_oob = true %}
+
+{% if update == 'add' and current_user.is_anonymous  -%}
+    {% set resource = ceAddrAnon(form)  %}
+
+{% elif update in ('add', 'edit')  %}
+    {% set resource = ceAddr(address, update) %}
+{% elif update == 'remove'  %}
+    {% set resource = delAddr(address) %}
+{%- endif %}
+
+{{ modalBG(show=true, content=resource, swap=swap_oob, title=title) }}

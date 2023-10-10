@@ -1,0 +1,9 @@
+{% extends 'templates/account.template.html' %}
+{% from 'components/forms.html' import accountForm %}
+
+
+{% block account_content %}
+
+    {{ accountForm(form) }}
+    
+{% endblock account_content %}

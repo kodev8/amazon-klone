@@ -1,0 +1,206 @@
+{% extends 'templates/base.html' %} 
+{% from 'components/amazon.html' import searchBar, customButton %}
+
+  {% block content %}
+
+  <div id="main" class="w-full h-full grid grid-cols-1 grid-rows-[auto_1fr]">
+
+      <header class="h-full w-full sticky top-0 z-40">
+
+          <nav id="nav-top" class="flex items-center justify-between text-white py-2 px-8 gap-x-2 
+          bg-[var(--nav-one-bg)] relative">
+
+          <!-- logo -->
+          <a hx-boost="false" href="{{ url_for('index', ref='logo-nav') }}" class=" flex items-center justify-center hover:outline  hover:outline-1 h-full cursor-pointer pt-2  px-2">
+            <img src="{{ url_for('static', filename='assets/logos/logo-w.png') }}" class="aspect-auto h-[40px]" alt="">
+          </a>
+
+          {% if current_user.is_authenticated -%}
+
+            {% if current_user.addresses -%}
+              {% set addr = current_user.addresses[0] %}
+            {%- endif %}
+
+          {% else %}
+            {% set addr = session.get('address') %}
+          {%- endif %}
+          
+          <!-- address -->
+          <div {% if not addr and current_user.is_anonymous %}
+             hx-get="{{ url_for('account_address_anon', update='add') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click" 
+             {% endif %}
+          class=" grid grid-cols-[auto_1fr] items-center hover:outline hover:outline-1 h-full cursor-pointer  px-2">
+
+            <i class="fa-solid fa-location-dot self-end text-lg mr-1"></i>
+
+            <div class="w-full">
+              <p class="text-sm text-slate-300">Deliver to {% if current_user.is_authenticated -%}
+                {{current_user.fname}},
+                {% endif -%}</p>
+
+              <p id='addr-text' class="font-bold text-sm">
+                  {% if addr -%}
+                    {{addr.city[:10]}} {% if addr.city | length > 10 %}...{% endif %}{{addr.zip_code}}
+                  {% else %}
+                      Enter Your Address
+                  {%- endif %}
+              </p> 
+            </div>
+          </div>
+
+          <!-- search -->
+          <div class="flex-grow">
+              {{ searchBar() }}
+          </div>
+
+          <!-- log in / reguster -->
+          <a href="{{ url_for('account') }}"  
+          hx-target="#page-content"
+          hx-select="#page-content"
+          hx-swap="outerHTML show:window:top"
+          id='nav-signin' class="flex justify-center items-center hover:outline hover:outline-1 h-full cursor-pointer relative  px-2 ">
+
+            <div class="pointer-events-none">
+              <p class="text-sm text-slate-300">Hello, {% if current_user.is_authenticated -%}
+                {{current_user.fname}}
+              {% else %}
+                Sign in
+              {%- endif %}</p>
+              <p class="font-bold">Accounts & Lists <i class="fa-solid fa-caret-down text-xs"></i></p> 
+            </div>
+          </a>
+
+          <!-- cart -->
+          <a href="{{ url_for('cart') }}" class=" hover:outline hover:outline-1 h-full cursor-pointer pr-8 w-fit relative">
+              <img src="{{ url_for('static', filename='assets/cart.svg') }}" class="" alt="">
+                  <span  
+                   id="cart-count" class="absolute top-[50%] left-[50%] -translate-x-[100%] -translate-y-[100%]  text-sm font-bold text-orange-500 ">1</span>
+                  
+              <span class="font-bold absolute left-[50%] bottom-0">Cart</span>
+          </a>
+
+            <!-- <i class="fa-solid fa-cart-shopping"></i> -->
+              <!-- <span id="cart-banner" class="absolute flex items-center justify-center h-6 w-6 rounded-[50%] bg-orange-500 bottom-[50%] left-[60%] bg">
+                  <span hx-get="{{ url_for('cart_count') }}" hx-trigger="load" 
+                   id="cart-count" class="text-white text-sm"></span>
+              </span>    -->
+
+            <!-- hover drop down -->
+           <div id='nav-signin-hover' class="absolute p-4 grid grid-cols-2 gap-y-2 speech-bubble sb-right
+           border border-solid border-slate-200 shadow-xl min-w-[300px] bg-white text-black rounded-md invisible " >
+
+           {% if current_user.is_anonymous -%}
+              <div class="col-span-full flex flex-col items-center justify-center text-xs  ">
+                <a href="{{ url_for('login') }}" >
+                  {{ customButton('Sign In', classes='p-1 mb-1') }}
+                </a>
+                <span>New customer? <a href="{{ url_for('register') }}" class="text-blue-400">Start here</a></span>
+
+              </div>
+           {%- endif %}
+            <div class=" px-4 items-center ">
+                <span class="font-bold text-base">Your lists</span>
+                <ul>
+                  <li><a href="{{ url_for('account_favourites') }}"  class="hover:underline hover:text-orange-500">Favourites</a></li>
+                </ul>
+            </div>
+
+            <div class="px-4 border-l border-l-solid border-black items-center ">
+              <span class="font-bold text-base">Your Account</span>
+                <ul class="list-none text-xs">
+                  <li><a href="{{ url_for('account') }}"  class="hover:underline hover:text-orange-500">Account</a></li>
+                  <li><a href="{{ url_for('account_orders') }}" class="hover:underline hover:text-orange-500" >Orders</a></li>
+
+                  {% if current_user.is_authenticated -%}
+                    <li  class="hover:underline hover:text-orange-500 cursor-pointer" hx-post="{{ url_for('logout') }}">Sign Out</li>
+                  {%- endif %}
+                </ul>
+            </div>
+            
+          </div>
+      </nav>
+      <nav id="nav-bottom" class="flex items-center p-1 justify-start text-white gap-x-4 pl-2 bg-[color:var(--nav-two-bg)] ">
+        <div  
+       onclick="document.querySelector('#side-nav').classList.remove('closed'); document.querySelector('#side-x').classList.remove('closed'); document.querySelector('#modal-bg').classList.remove('hidden')"
+        class=" py-2 cursor-pointer font-medium ml-2 hover:outline hover:outline-1">
+          <i class="fa-solid fa-bars"></i>
+          <span>All</span>
+        </div>
+
+        <span hx-get="{{ url_for('not_implemented') }}" hx-target="#messages" hx-swap="innerHTML" class="py-2 px-2 font-medium hover:outline  hover:outline-1"> Today's Deals </span>
+        <span hx-get="{{ url_for('not_implemented') }}" hx-target="#messages" hx-swap="innerHTML" class="py-2 px-2 font-medium hover:outline hover:outline-1"> Sports </span>
+        <span hx-get="{{ url_for('not_implemented') }}" hx-target="#messages" hx-swap="innerHTML" class="py-2 px-2 font-medium hover:outline hover:outline-1"> Contact </span>
+      </nav>
+    </header>
+      <!-- end of nav -->
+
+    <i id="side-x"onclick="this.nextElementSibling.classList.add('closed'); document.querySelector('#modal-bg').classList.add('hidden'); this.classList.add('closed')" 
+          class="closed absolute fa-solid fa-xmark text-white text-3xl left-[320px] top-4 cursor-pointer z-[60]"></i>
+
+        <div id="side-nav" class="no-scrollbar closed h-screen overflow-y-auto  overflow-x-hidden top-0 z-[60] left-0 absolute w-[310px] bg-red-500">
+          {% if current_user.is_authenticated -%}
+              <a href="{{ url_for('account') }}" class="flex items-center justify-center py-2 pt-4 text-white text-lg bg-[color:var(--nav-two-bg)] text-center font-medium">Hello {{ current_user.fname }}</a>
+          {% else %}
+              <a href="{{ url_for('login') }}" class="flex items-center justify-center py-2 pt-4 text-white text-lg bg-[color:var(--nav-two-bg)] text-center font-medium">
+                <i class="fa-solid fa-circle-user mr-2"></i>
+                Hello, Sign In
+              </a>
+        {%- endif %}
+
+          <div class="bg-gray-200 h-[300px]"></div>
+          <div class="bg-gray-200 h-[300px]"></div>
+          <div class="bg-gray-200 h-[300px]"></div>
+          <div class="bg-gray-200 h-[300px]"></div>
+          
+
+        </div>
+
+    <div id="page-content" hx-swap="outerHTML show:window:top" class="w-full bg-slate-100 relative">
+      <script type="text/javascript" src="{{url_for('static', filename='scripts/defer.js')}}" defer></script>
+          
+      <div id="banner"  class="absolute top-0 w-full z-[70]"></div>
+      {% block page_content -%}
+
+          
+            
+      {%- endblock page_content %}
+      {% if current_user.is_anonymous and request.endpoint=='index' and not request.args.get('ref') -%}
+          <!-- if anonymous user -->
+
+            <script type="text/javascript" defer>
+
+            document.addEventListener("DOMContentLoaded", ()  => {
+              const mouseenterEvent = new Event('mouseenter');
+              const mouseleaveEvent = new Event('mouseleave');
+
+              
+              setTimeout( // first timeout forr positiong
+              ()=>{
+
+                signin.dispatchEvent(mouseenterEvent)
+                signin.dispatchEvent(mouseleaveEvent)
+
+                signinHover.classList.add('opacity-0')
+
+                setTimeout(() => {
+                  console.log('rmeoved invisible')
+                  signinHover.classList.remove('invisible')
+
+                }, 100)
+
+                setTimeout(() => {
+                  signinHover.classList.add('opacity-100','transition-opacity', 'duration-500')
+                }, 200)
+
+              }, 1000
+
+              )
+          });
+          </script>
+      {%- endif %} 
+  </div>
+  <!-- end page content -->
+</div>
+
+
+{% endblock content %}

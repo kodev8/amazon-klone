@@ -1,0 +1,97 @@
+{% extends 'templates/account.template.html' %}
+{% from 'components/amazon.html' import orderStatus, accountPagination %}
+
+{% block account_content %}
+<!-- this.closest('th').style.maxWidth=0; this.closest('th').style.overflow='hidden' -->
+
+<div class="flex flex-col">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+            <div class="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                            <th scope="col" class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center gap-x-3">
+                                    <!-- <input type="checkbox" onclick="" class="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"> -->
+                                    <button class="flex items-center gap-x-2">
+                                        <span>Order#</span>
+                                    </button>
+                                </div>
+                            </th>
+
+                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                Item
+                            </th>
+
+                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                Date
+                            </th>
+
+                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                Status
+                            </th>
+
+                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                Cost
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    
+                    <tbody id='order-table' hx-swap='true' class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+
+                        {% if current_user.orders | length > 0 %}
+                            
+                            {% for order in current_user.orders %}
+                                
+                            <tr>
+                                <td class="px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
+                                        <span>#{{order.id}}</span>
+                                </td>
+                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">Jan 6, 2022</td>
+                                <td class="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
+                                    <div class="inline-flex items-center px-3 py-1 rounded-full gap-x-2 text-emerald-500 bg-emerald-100/60 dark:bg-gray-800">
+                                        
+                                        {{order.order}}
+                                    </div>
+                                </td>
+                                
+                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">Monthly subscription</td>
+                            </tr>
+                            {% endfor %}
+
+
+                        {% else %}
+
+                        
+                        <tr>
+
+                            <td colspan="100%">
+                                <div class="flex flex-col p-8 gap-y-4 items-center justify-center">
+                                    <span class="font-bold text-xl">You dont have any orders yet</span>
+                                    {% if cart_count > 0 %}
+                                    <a  href="{{ url_for('cart') }}" class="font-medium text-lg underline text-[var(--a-blue)]">Checkout from your Cart Now!</a>
+
+                                    {% else %}
+                                    <a  hx-boost='false' href="{{ url_for('index') }}" class="font-medium text-lg underline text-[var(--a-blue)]">Start shopping now</a>
+                                    {% endif %}
+                                        
+                            </div>
+                            </td>
+
+                           
+                            
+                        </tr>
+
+                        {% endif %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock account_content %}

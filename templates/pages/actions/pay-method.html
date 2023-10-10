@@ -1,0 +1,50 @@
+{% from 'components/amazon.html' import customButton, separator  %}
+
+<div 
+id="paymethod"
+hx-ext="class-tools"
+classes="remove noti-close: & add pay-open:1s"
+class="col-span-full  max-h-0 noti-close overflow-hidden">
+    <span 
+        class="font-bold text-xl col-span-full" 
+       >2<span class="ml-4 ">Choose a payment method</span></span>
+
+    <div
+    
+    class="col-span-4 p-4 rounded-md border  border-gray-300 border-solid grid grid-cols-5">
+
+        <span class="col-span-full font-bold text-xl">Your cards</span>
+
+        <!-- top card -->
+        <span class=""></span>
+        <span class=""></span>
+        <span class=""></span>
+
+        <span class="text-gray-500">Name on card</span>
+        <span class="text-gray-500">Expires on</span>
+
+
+        {{ separator() }}
+
+
+        <!-- detail card -->
+
+        <span><input type="radio" checked></span>
+        <span class="col-span-2 text-sm"><i class="fa-regular fa-credit-card  mr-2"></i>Default Maseter Card ending in 9999</span>
+
+        <span claas="text-sm">{{ current_user.fname }} {{ current_user.lname }}</span>
+
+        <span class="tetx-sm">12/2023</span>
+        
+    </div>
+
+</div>
+
+<span id="pay-actions" hx-swap-oob="true" 
+hx-post="{{url_for('create_order')}}" 
+hx-trigger="click" 
+
+>
+    {{ customButton('Confirm Payment', color='yellow-300', classes='!font-light !text-sm')}}
+</span>
+    

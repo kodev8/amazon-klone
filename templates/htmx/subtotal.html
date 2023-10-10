@@ -1,0 +1,67 @@
+{% from './components/amazon.html' import customButton  %}
+{% from './components/notifs.html' import oob_notif  %}
+
+
+
+{% if error_message %}
+    {{oob_notif(error_message, 'error')}}
+
+{% elif input_cart%}
+<div class="inline-flex w-fit gap-x-3">
+          <input class="outline outline-blue-300 rounded-md pl-2" type="number" name="qty" min="0" max="30" value="10">
+          
+          <span onclick="htmx.trigger(this.closest('form'), 'cvent')">
+            {{ customButton('Update', classes='text-xs !py-1 !px-4', as_submit=false)}}
+
+          </span>
+        </div>
+
+{%else%}
+    {% if not sub_total %}
+
+        <span id="center-subtotal" class="sub">No Items selected</span>
+
+        <span id="subtotal-message" hx-swap-oob="true" class=text-sm> 
+            No items selected
+            <span 
+            hx-post="{{ url_for('selected_subtotal', how='all' ) }}"
+            hx-target="#center-subtotal"
+            hx-trigger="click[select('all')]"
+            class="text-blue-400 cursor-pointer">
+                Select all items
+            </span>
+        </span>
+
+        <div id="side-subtotal"  class="absolute" hx-swap-oob="true"> 
+            
+        </div>
+
+    {% else %}
+    <span id="center-subtotal" class="sub">
+        Subtotal (selected items): <span class="font-bold">${{sub_total}}</span>
+    </span>
+
+    <span id="subtotal-message" hx-swap-oob="true" class=text-sm> 
+        <span hx-post="{{ url_for('selected_subtotal', how='none') }}"  hx-target="#center-subtotal" 
+        hx-trigger="click[select('none')]"
+        class="text-blue-400 cursor-pointer">Deselect all items</span>
+    </span>
+
+    <div id="side-subtotal" hx-swap-oob="true"
+    class="bg-white rounded-sm border border-solid border-slate-300 p-4 w-64 h-fit flex flex-col gap-y-4 mb-4" >
+    
+        <span>Subtotal (selected items): <span class="font-bold">${{sub_total}}</span></span>
+
+        <a href="{{ url_for('checkout') }}">
+            {{ customButton('Proceed to checkout', classes='p-1 text-xs') }}
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- update cart count -->
+    <span  hx-swap-oob="true" id="cart-count" class="absolute bottom-[40%] left-[50%] font-bold text-orange-500 text-lg">{{ cart_count }}</span>  
+
+{% endif %}
+
+
+

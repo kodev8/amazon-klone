@@ -1,0 +1,118 @@
+{% extends './templates/base.html' %}
+{% from 'components/amazon.html' import customButton, separator  %}
+
+
+
+{% block content -%}
+
+<div class="w-full h-full grid-flow-row bg-white">
+    <header class="">
+
+        <nav id="nav-top" class="flex items-center justify-between py-6 px-8 gap-x-2 
+        bg-gray-100 relative border-b border-solid border-slate-200">
+
+        <!-- logo -->
+        <a hx-boost='false' href=" {{ url_for('index') }}" class=" flex items-center justify-center cursor-pointer pt-2 px-2">
+          <img src="{{ url_for('static', filename='assets/logo/logo.svg') }}" class="aspect-auto h-[40px]" alt="">
+        </a>
+
+
+        <div class="flex flex-grow justify-center">
+           <span class="text-3xl font-normal">Checkout (<span class="text-[var(--a-blue)] font-medium">{{ sub_count }} items</span>)</span>
+        </div>
+
+       
+        
+        <i class="fa-solid fa-lock text-2xl text-gray-400"></i>
+        
+
+    </nav>
+    </header>
+
+    <div class="grid mx-auto w-full  sm:grid-cols-[2fr_1fr] overflow-auto p-4" >
+
+
+        <div id="checkout-grid" class="ml-auto grid grid-cols-4 gap-y-2 h-fit">
+            <!-- first 4 -->
+
+           
+            <span class="font-bold text-xl">1<span class="ml-4 ">Shipping address</span></span>
+            <div class="grid col-span-2 text-left mx-auto">
+
+                {% if current_user.addresses | length > 0 %}
+                
+                    {% set addr = current_user.addresses[0]  %}
+                    {% set addrcheck = true  %}
+                <span class="font-bold">{{current_user.fname}} {{current_user.lname}}</span>
+                <span>{{ addr.line1 }}</span>
+                <span>{{ addr.city }},{{ addr.zip_code }}</span>
+                <span>{{  addr.country }}</span>
+                
+                {% endif %}
+
+            </div>
+            
+            {% if current_user.addresses | length > 1 %}
+                <span class="text-right text-[var(--a-blue)] font-medium">Change</span>
+            {% endif %}
+
+            {{ separator() }}
+
+
+            <!-- next 4 -->
+            <span id="paymethod"></span>
+            
+        </div>
+                    
+            <div class="bg-white border border-solid justify-self-center rounded-xl border-slate-300 p-4 w-72 h-fit flex flex-col " >
+
+                {% if addrcheck %}
+
+                <span id="pay-actions" hx-get="{{ url_for('pay_method') }}" hx-target="#paymethod" hx-swap="outerHTML" hx-select="#paymethod">
+                    {{ customButton('Use this address', color='yellow-300', classes='!font-light !text-sm')}}
+                </span>
+
+                {%else%}
+
+                <span
+                hx-get="{{ url_for('account_address_get', update='add', next='/checkout') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click"
+                >
+                {{ customButton('Set up an address', color='yellow-300', classes='!font-light !text-sm')}}
+
+                </span>
+
+                {% endif %}
+
+                {{ separator() }}
+
+                <span class="font-bold pb-2">Order Summary</span>
+                <div class="grid grid-cols-[2fr_1fr] gap-x-4 gap-y-2 text-xs text-gray-700 pb-2 [&>*:nth-child(even)]:text-right">
+                    <span>Items</span>
+                    <span>{{ prices['sub_total'] }}</span>
+                    <span>Shipping</span>
+                    <span>{{ prices['shipping'] }}</span>
+                    <span></span>
+                    {{ separator(1) }}
+                    
+                    <span>Total before tax:</span>
+                    <span>{{ prices['pre_tax'] }}</span>
+                    
+                    <span>Estimated tax</span>
+                    <span>{{ prices['tax'] }}</span>
+
+
+                </div>
+                {{ separator() }}
+
+                <div class="w-full flex text-xl font-bold text-red-700">
+                    <span >Payment Total</span>
+                    <span class="ml-auto tex-right">USD {{ prices['with_tax'] }}</span>
+                </div>
+                
+            </div>
+
+    </div>
+  
+</div>
+  
+{%- endblock content %}
