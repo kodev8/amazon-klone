@@ -3,7 +3,7 @@
 <div 
 id="paymethod"
 hx-ext="class-tools"
-classes="remove noti-close: & add pay-open:1s"
+classes="remove noti-close: & add pay-open:0s"
 class="col-span-full  max-h-0 noti-close overflow-hidden">
     <span 
         class="font-bold text-xl col-span-full" 
@@ -40,11 +40,13 @@ class="col-span-full  max-h-0 noti-close overflow-hidden">
 
 </div>
 
-<span id="pay-actions" hx-swap-oob="true" 
+{# TODO add oob delay #}
+<span id="pay-actions" hx-swap-oob="outerHTML" 
 hx-post="{{url_for('create_order')}}" 
 hx-trigger="click" 
 
 >
+
     {{ customButton('Confirm Payment', color='yellow-300', classes='!font-light !text-sm')}}
 </span>
     

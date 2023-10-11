@@ -42,7 +42,7 @@
                                         <form>
                                             <td class="px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
                                                 
-                                                <a href="{{ url_for('product', product=fave.product._id) }}" hx-target="#page-content" hx-select="#page-content" >
+                                                <a href="{{ url_for('product', product=fave.product._id) }}" class="hover:underline" hx-target="#page-content" hx-select="#page-content" >
                                                     {{ fave.product.title[:25]}}{% if fave.product.title|length > 25  %}...{% endif %}
                                                 </a>
                                             </td>

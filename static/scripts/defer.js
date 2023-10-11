@@ -23,32 +23,47 @@ selectId.onchange=updateSelect
 }
 
 
-function handleMiniImages()
-// image on product 
-{let main_img = document.querySelector('#main-img');
-if (main_img){
-    var main_src = main_img.src
+function handleMiniImages() {
+  let main_img = document.querySelector('#main-img');
+  if (main_img) {
+    var main_src = main_img.src;
+    let images = document.querySelectorAll('.mini-img');
+    let showMainTimer;
 
-    let images = document.querySelectorAll('.mini-img')
     images.forEach(img => {
-        img.addEventListener('mouseover', ()=>main_img.src = img.src)
-        img.addEventListener('mouseout', ()=>main_img.src = main_src)
-        img.addEventListener('click', ()=> {
-            main_img.src = img.src
-            main_src = img.src
-            images.forEach(innerImg =>{
-                if(innerImg != img){
-                    innerImg.classList.remove("border-orange-300")
+      showMain = () => {
+        main_img.src = main_src;
+      };
 
-                }
-                })
-            img.classList.remove('border-slate-300')
-            img.classList.add('border-orange-300')
-            })
-        
-    })
+      img.addEventListener('mouseenter', () => {
+        if (showMainTimer) {
+          clearTimeout(showMainTimer);
+        }
+        showImg = setTimeout(() => {
+          main_img.src = img.src;
+        }, 100);
+      });
+
+      img.addEventListener('mouseleave', () => {
+        clearTimeout(showImg);
+        showMainTimer = setTimeout(showMain, 100);
+      });
+
+      img.addEventListener('click', () => {
+        main_img.src = img.src;
+        main_src = img.src;
+        images.forEach(innerImg => {
+          if (innerImg != img) {
+            innerImg.classList.remove("border-orange-300");
+          }
+        });
+        img.classList.remove('border-slate-300');
+        img.classList.add('border-orange-300');
+      });
+    });
   }
 }
+
 
 handleMiniImages()
 

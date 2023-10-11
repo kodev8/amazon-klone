@@ -9,8 +9,9 @@ from sub.Product import Product
 from sub.Cart import Cart
 from datetime import timedelta
 import re
-
-# is there a difference when requesting several small files vs 1 large file
+import locale
+locale.setlocale( locale.LC_ALL, '' )
+# is there a difference when requesting several small files vs 1 large file ?
 
 # APP CONFIG
 app = Flask(__name__, static_folder='./static')
@@ -382,30 +383,33 @@ def cart():
 
     cart = Cart.load_cart()
 
-    suggested = []
+    suggested = set()
 
     # these should be instances of the Product object or dict in the case of anonymous
     exclude_ids =[product.get('_id') for product in cart]
-
-    print('Exclude ids:: ', exclude_ids)
     
     # generate 3 random products to display on suggested tab -- these are products that are not in the users cart already
-    while len(suggested) < 3:
-
+    # not sure if mongo db sample returns unqiue values
+    count = 0 # for max 10 checks
+    while len(suggested) < 3 and count < 10:
+        count+=1
         random_product = list(products.aggregate([
         { '$match': { '_id': { '$nin': exclude_ids } } }, 
         { '$sample': { 'size': 1 } } 
         ]))
-        # check if any product is remaining to be selected, index it since aggregation returns lists
-        if random_product:
-            random_product = random_product[0]
 
-        # skip products w no stock left
+        # check if any product is remaining to be selected, index it since aggregation returns lists
+        if not random_product:
+            continue
+        
+        random_product = random_product[0]
+
+        # skip products w no stock left or already found
         if random_product['stock'] <=0:
             continue
 
         exclude_ids.append(random_product['_id'])
-        suggested.append(Product.dump(random_product))
+        suggested.add(Product.dump(random_product))
 
     return render_template('pages/actions/cart.html', cart_products=cart, suggested=suggested)
 
@@ -460,7 +464,6 @@ def cart_add():
         temp_prod = product
         temp_prod.qty = quantity
         temp_cart = [temp_prod]
-        print(checkout(temp_cart=temp_cart))
         return checkout(temp_cart=temp_cart)
 
     return render_template('htmx/update-cart.html', cart_count=cart_count, 
@@ -554,7 +557,7 @@ def selected_subtotal(how=None):
             if current_user.is_authenticated:
                 Cart.update_selected_auth(product, False)
 
-    sub_total = Cart.sub_total(cart)
+    sub_total = locale.currency(Cart.sub_total(cart), grouping=True)
     cart_count = Cart.count(cart)
     return render_template('htmx/subtotal.html', sub_total=sub_total, cart_count=cart_count)
 
@@ -562,11 +565,16 @@ def selected_subtotal(how=None):
 @app.route('/checkout', methods=['GET'])
 @login_required
 def checkout(temp_cart=None):
-
     
     cart = temp_cart if temp_cart else Cart.load_cart()
 
     sub_count = sum(product.get('qty') for product in cart if product.get('selected'))
+
+    # guard against empty cart with checkout
+    if sub_count == 0:
+        flash('Ensure that you have selected the items you wish to checkout', 'warning')
+        return redirect(url_for('cart'))
+    
     sub_total = Cart.sub_total(cart)
     shipping = float(sub_total) * Product.SHIPPING
     tax = float(sub_total) * Product.TAX
@@ -582,7 +590,7 @@ def checkout(temp_cart=None):
     }
 
     for price in prices:
-        prices[price] = f'${prices[price]:0.2f}'
+        prices[price] = locale.currency(prices[price], grouping=True )
 
     return render_template('/pages/actions/checkout.html', products=products,sub_count=sub_count,prices=prices )  
 
@@ -628,11 +636,12 @@ def search():
 def get_categories():
     res_cats = [*categories.find({}, {'title': 1, 'key': 1})]
     
-    # only set active cat when coming from /products
-    active_category = request.args.get('active_category') if re.search(f"^{url_for('get_products', _external=True)}", request.referrer) else None
+    # only set active category when coming from /product or /products
+    pattern = re.compile(f"^{url_for('product', _external=True)}s?")
+    active_category = request.args.get('active_category') if re.search(pattern, request.referrer) else None
     template = render_template('htmx/search-categories.html', categories=res_cats, active_category=active_category)
-    
-    # we can cache since the url would change for each active category
+
+    # we can cache since the url would change for each active category and it is nto expected to change
     create_cache(request, template)
     return template
 
@@ -708,19 +717,18 @@ def account_address():
     template = render_template('pages/account/address.html', title='Address',)
     return template
 
-# OPENS MODALAS
+# OPENS MODALS
 @app.route('/address/<string:update>', methods=['GET', 'POST'])
 @htmx_request
-def account_address_anon(update): 
+def account_address_anon(update):
+
+    # TODO: allow change  
     form=AddressForm()
     if request.method=='GET':
         if current_user.is_anonymous and update=='add':
             template = render_template('htmx/modals/address-modals.html',update=update, title="Choose your location", form=form) 
             # create_cache(request.url, template)
             return template
-
-
-        
         return redirect(url_for('index'))
     
     # testing
@@ -742,8 +750,6 @@ def account_address_anon(update):
 @htmx_request
 @login_required
 def account_address_get(update): 
-
-
     address_form = AddressForm()
 
     form_addr = request.args.get('address')
@@ -781,13 +787,10 @@ def account_address_crud(update):
         return htmx_redirect(url_for('account_address'))
     
     form = AddressForm()
-
     if request.method == 'POST':
 
         if not form.validate_on_submit():
             return render_template('htmx/form-errors.html', errors=form.errors)
-
-
         addr = Address()
 
         form.populate_obj(addr)
@@ -867,7 +870,6 @@ def account_favourites():
             print('fail by exiting fave post')
             return render_template('pages/account/favourites.html', message_only='This product is already in your favouriites', 
                                    type='error', link= {'url': url_for('account_favourites'), 'text': 'View Your products here'})
-
 
         fave = Favourite(product_id=product_id)
         current_user.favourites.append(fave)

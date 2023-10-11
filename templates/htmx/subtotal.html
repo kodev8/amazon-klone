@@ -6,7 +6,7 @@
 {% if error_message %}
     {{oob_notif(error_message, 'error')}}
 
-{% elif input_cart%}
+{% elif input_cart %}
 <div class="inline-flex w-fit gap-x-3">
           <input class="outline outline-blue-300 rounded-md pl-2" type="number" name="qty" min="0" max="30" value="10">
           
@@ -38,7 +38,7 @@
 
     {% else %}
     <span id="center-subtotal" class="sub">
-        Subtotal (selected items): <span class="font-bold">${{sub_total}}</span>
+        Subtotal (selected items): <span class="font-bold">{{sub_total}}</span>
     </span>
 
     <span id="subtotal-message" hx-swap-oob="true" class=text-sm> 
@@ -50,13 +50,16 @@
     <div id="side-subtotal" hx-swap-oob="true"
     class="bg-white rounded-sm border border-solid border-slate-300 p-4 w-64 h-fit flex flex-col gap-y-4 mb-4" >
     
-        <span>Subtotal (selected items): <span class="font-bold">${{sub_total}}</span></span>
+        <span>Subtotal (selected items): <span class="font-bold">{{sub_total}}</span></span>
 
         <a href="{{ url_for('checkout') }}">
             {{ customButton('Proceed to checkout', classes='p-1 text-xs') }}
         </a>
     </div>
+
     {% endif %}
+    <span  id="cart-count" hx-swap-oob="true" class="font-bold text-orange-500 absolute ">{{cart_count}}</span>
+
 {% endif %}
 
 

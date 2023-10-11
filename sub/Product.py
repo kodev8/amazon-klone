@@ -57,6 +57,7 @@ class Product:
 
         if getattr(self,'price', None):
             try:
+                # TODO: use local for prices instead ?*
                 self.price_display = int(self.price)
                 dec,_= math.modf(float(self.price))
                 self.decimal = f"{dec:0.2f}".split('.')[-1]
@@ -80,6 +81,10 @@ class Product:
     def __eq__(self, other):
         assert isinstance(other, Product)
         return self._id == other._id
+    
+    def __hash__(self):
+        
+        return int(str(self._id), 16)
     
     def get(self, attr, default=None):
         return getattr(self, attr, default)    

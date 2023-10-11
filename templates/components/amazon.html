@@ -28,6 +28,7 @@ method="GET"
 hx-target="#page-content"
 hx-select="#page-content"
 hx-swap="outerHTML show:window:top"
+onsubmit="this.querySelector('input')?.blur()"
 action="{{ url_for('get_products') }}"
 class="flex items-center search  rounded-md">
 
@@ -136,7 +137,7 @@ class="flex items-center search  rounded-md">
   {% if product.get('stock', 0) > 9 -%}
   <span  class="text-green-600 font-medium text-{{size}}">In Stock</span>
   {% elif product.get('stock', 0) > 0 %}
-  <span class="text-orange-300 font-medium text-{{size}}">Last Stock remaining:<span> {{ product.get('stock', 0) }}</span></span>
+  <span class="text-orange-300 font-medium text-{{size}}">Last Stock remaining</span>
   {% else %}
   <span class="text-red-500 font-medium text-{{size}}">Out of stock</span>
 
@@ -229,7 +230,7 @@ class="flex items-center search  rounded-md">
 action="{{url_for('selected_subtotal', how='update')}}" 
 method="POST"
 hx-target="#center-subtotal" 
-hx-swap="outerHTML" 
+hx-swap="outerHTML show:unset" 
 hx-trigger="{{listener}}"
 hx-push-url="false"
 >
@@ -251,7 +252,7 @@ hx-push-url="false"
   <!-- </div> -->
 
   <div class="flex flex-col gap-y-4">
-      <a  hx-target='#page-content' hx-select="#page-content" href="{{ url_for('product', product=product.get('_id')) }}" class="text-3xl hover:underline hover:text-blue-300">{{product.title}}</a>
+      <a  hx-target='#page-content' hx-select="#page-content" href="{{ url_for('product', product=product.get('_id')) }}" hx-push-url="true" class="text-3xl w-fit hover:underline hover:text-blue-300">{{product.title}}</a>
       <span class="font-bold texr-xl">${{product.get('price')}}</span>
       <span>{{ productStock(product, size='sm') }}</span>
 
@@ -259,14 +260,19 @@ hx-push-url="false"
 
       <div class="flex">
           <span hx-delete="{{ url_for('cart_delete', product=product.get('_id')) }}" hx-swap="none"
-           class="text-xs text-red-600 px-2 border-r-2 border-solid  border-gray-200  cursor-pointer">
+           class="text-xs text-red-600 px-2 border-r-2 border-solid  border-gray-200  cursor-pointer hover:underline">
               Delete
           </span>
-          <span hx-post="{{ url_for('account_favourites')}}" hx-trigger="click" hx-include="closest form"  hx-swap="none"
-          class="text-xs text-yellow-600 px-2 border-r-2 border-solid  border-gray-200 cursor-pointer">
-              Add to Favourites
-          </span>
-          <span class="text-xs text-[var(--a-blue)] px-2  cursor-pointer">
+
+          {% if current_user.is_authenticated %}
+            <span hx-post="{{ url_for('account_favourites')}}" hx-trigger="click" hx-include="closest form"  hx-swap="none"
+            class="text-xs text-yellow-600 px-2 border-r-2 border-solid  border-gray-200 cursor-pointer hover:underline">
+                Add to Favourites
+            </span>
+          {% endif %}
+          
+          <span hx-get="{{ url_for('not_implemented') }}" hx-target="#messages" hx-swap="innerHTML"
+          class="text-xs text-[var(--a-blue)] px-2  cursor-pointer hover:underline">
               Share
           </span>
       </div>

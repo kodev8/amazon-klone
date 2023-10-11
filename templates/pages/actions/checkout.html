@@ -1,9 +1,21 @@
 {% extends './templates/base.html' %}
 {% from 'components/amazon.html' import customButton, separator  %}
+{% from 'components/notifs.html' import oob_notif %}
 
 
 
 {% block content -%}
+
+
+
+{% if message %}
+
+{{ oob_notif(message, type) }}
+
+
+    
+{% else %}
+    
 
 <div class="w-full h-full grid-flow-row bg-white">
     <header class="">
@@ -64,7 +76,7 @@
             
         </div>
                     
-            <div class="bg-white border border-solid justify-self-center rounded-xl border-slate-300 p-4 w-72 h-fit flex flex-col " >
+            <div class="bg-white border border-solid justify-self-center rounded-xl border-slate-300 p-4 min-w-72  h-fit flex flex-col " >
 
                 {% if addrcheck %}
 
@@ -105,7 +117,7 @@
                 {{ separator() }}
 
                 <div class="w-full flex text-xl font-bold text-red-700">
-                    <span >Payment Total</span>
+                    <span class=pr-4>Payment Total </span>
                     <span class="ml-auto tex-right">USD {{ prices['with_tax'] }}</span>
                 </div>
                 
@@ -115,4 +127,6 @@
   
 </div>
   
+{% endif %}
+
 {%- endblock content %}

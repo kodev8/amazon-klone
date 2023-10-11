@@ -60,7 +60,7 @@
       <div class=" h-50 w-fll bg-white p-6 flex flex-col">
         <span class="font-bold text-2xl">{{ category.title.title() }} </span>
           <img src="{{ category.cover  }}" class="max-h-full w-auto" alt="">
-        <a  href="{{ url_for('get_products', category=category.key) }}" hx-target="#page-content" hx-select="#page-content" class="text-xs mt-auto mb-4 text-blue-400 hover:text-blue-700">Shop now</a>
+        <a  href="{{ url_for('get_products', category=category.key) }}" hx-target="#page-content" hx-select="#page-content" hx-swap="outerHTML show:unset" class="text-xs mt-auto mb-4 text-blue-400 hover:text-blue-700">Shop now</a>
       </div>
     
   {%- endfor %}

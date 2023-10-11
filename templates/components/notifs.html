@@ -10,6 +10,8 @@
             {{ success(message, link) }}
         {% elif type == 'info' %}
             {{ info(message, link) }}
+        {% elif type == 'warning' %}
+            {{ warning(message) }}
         {%- endif %} 
     </div>
 {%- endmacro %}
@@ -59,6 +61,15 @@
         {% if link %}
         <a class="underline ml-2" href="{{link.url}}" hx-boost="false">{{link.text}}</a>
         {% endif %}
+    </div>
+
+{% endmacro %}
+
+{% macro warning(message) -%}
+
+    <div onclick="closeNotif(this)" class="flex items-center justify-center bg-yellow-100 text-yellow-500 text-sm font-bold px-4 py-3 cursor-pointer" role="alert">
+        <i class="fa-solid fa-triangle-exclamation mr-4"></i>
+        <p>{{ message }}</p>
     </div>
 
 {% endmacro %}

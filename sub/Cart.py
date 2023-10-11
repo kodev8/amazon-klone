@@ -3,7 +3,7 @@ from flask_login import current_user
 from flask import session
 from datetime import datetime
 from sub.Product import Product
-from config import products, carts
+from config import carts
 
 class Cart:
 
@@ -201,10 +201,7 @@ class Cart:
 
     @staticmethod
     def sub_total(cart):
-        sub_total = sum(float(product.get('price')) * int(product.get('qty')) for product in cart if product.get('selected'))
-        if sub_total != 0:
-            return f'{sub_total:0.2f}'
-        return 0
+        return sum(float(product.get('price')) * int(product.get('qty')) for product in cart if product.get('selected'))
 
 
 
