@@ -1,14 +1,14 @@
 {% from './components/amazon.html' import searchProducts %}
 
-{% if not results %}
+{% if not results -%}
 
 <div class="w-full flex text-center py-2 font-bold"> No results </div>
 
 {% else %}
 
-    {% for product in results %}
+    {% for product in results -%}
         {{searchProducts(product)}}
-    {% endfor %}
+    {%- endfor %}
    
-        
-{% endif %}
+    
+{%- endif %}

@@ -98,7 +98,7 @@
 
                 <div class="flex w-fit border border-gray-500 border-solid rounded-lg p-2">
                     <span class="">$</span>
-                    <input type="number" maxlength="9" id="price_min" placeholder="Min" name="price_min" class="outline-none border-none w-full"
+                    <input type="number" maxlength="9" id="price_min" placeholder="Min" name="price_min" min="0" class="outline-none border-none w-full"
                     {% if auto_fill %}
                         value="{{request.args.get('price_min') }}"
                     {% endif %}
@@ -107,7 +107,7 @@
 
                 <div class="flex w-fit border border-gray-500 border-solid rounded-lg p-2 ">
                     <span class="">$</span>
-                    <input type="number" maxlength="9" id="price_max" placeholder="Max" name="price_max"  class="outline-none border-none w-full"
+                    <input type="number" maxlength="9" id="price_max" placeholder="Max" name="price_max"  min="0" class="outline-none border-none w-full"
                     {% if auto_fill -%}
                         value="{{request.args.get('price_max') }}"
                     {%- endif %}>

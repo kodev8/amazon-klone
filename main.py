@@ -49,7 +49,6 @@ def filter_args(args, *args_to_remove):
             del args[arg]
     return args
 
-
 # ===================== MIDDLEWARE===========
 # SESSION
 @app.before_request
@@ -444,8 +443,6 @@ def cart_add():
     product_id = request.form.get('product')
     quantity = request.form.get('qty')
 
-    print(request.form)
-
     if not product_id or not quantity:
         return render_template('htmx/update-cart.html', message='Unable to prcoess this product.', type='error')
 
@@ -491,7 +488,7 @@ def cart_delete():
 @htmx_request
 def cart_count():
     """ returns count of items in a cart whether from session or db"""
-    return render_template('htmx/update-cart.html', cart_count=Cart.count(Cart.load_cart()))
+    return render_template('htmx/update-cart.html', cart_count=Cart.count(Cart.load_cart()), cart_only=True)
 
 @app.route("/input-cart", methods=['GET'])
 @htmx_request
@@ -631,8 +628,8 @@ def search():
 def get_categories():
     res_cats = [*categories.find({}, {'title': 1, 'key': 1})]
     
-    active_category = request.args.get('active_category')
-    
+    # only set active cat when coming from /products
+    active_category = request.args.get('active_category') if re.search(f"^{url_for('get_products', _external=True)}", request.referrer) else None
     template = render_template('htmx/search-categories.html', categories=res_cats, active_category=active_category)
     
     # we can cache since the url would change for each active category

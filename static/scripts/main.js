@@ -153,3 +153,24 @@ country.onchange = () => zip.value = ''
 
 }
 
+function openSideNav() {
+    console.log('hhh')
+    let sideNav = document.querySelector('#side-nav')
+    let sideX =   document.querySelector('#side-x')
+    let modalBg = document.querySelector('#modal-bg')
+
+    sideNav?.classList.remove('closed'); 
+    sideX?.classList.remove('closed')
+    modalBg?.classList.remove('hidden')
+       modalBg.addEventListener('click', closeSideNav) 
+}
+
+function closeSideNav() {
+    let sideNav = document.querySelector('#side-nav')
+    let sideX =   document.querySelector('#side-x')
+    let modalBg = document.querySelector('#modal-bg')
+
+    sideNav.classList.add('closed'); 
+    modalBg.classList.add('hidden'); 
+    sideX.classList.add('closed')
+}

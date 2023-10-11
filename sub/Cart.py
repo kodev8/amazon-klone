@@ -10,18 +10,15 @@ class Cart:
     @staticmethod
     def clear_cart():
         if session.get('cart'):
-        
             session['cart'] = []
 
     @staticmethod
     def load_cart():
-
         cart =  session['cart'] if not current_user.is_authenticated else  [Product.dump(product, id_field='product_id', merge=True) for product in carts.find_one({'user_id': current_user.id}, {'products':1})['products']]
         if current_user.is_anonymous:
             cart.sort(key=lambda x: x.get('date_added'), reverse=True)
         else:
             cart.sort(key=lambda x: x.date_added, reverse=True)
-        
         return cart
     
     @staticmethod
@@ -43,7 +40,6 @@ class Cart:
                     break
 
             if not found:
-
                 product_dict = {
                     'qty':int(qty), 'date_added':datetime.now(),'selected':True, 
                 }

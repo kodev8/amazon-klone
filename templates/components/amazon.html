@@ -18,7 +18,8 @@ hx-get="{{ url_for('get_categories' , with_state=request.endpoint=='get_products
 
 <!-- placed out of form to avoid interferrence -->
 <input type="hidden"  
-hx-get="{{ url_for('get_categories', active_category=request.args.get('category') )}}" hx-target="#search-cat" hx-swap="beforeend" hx-trigger="load"
+hx-get="{{ url_for('get_categories', active_category=request.args.get('category') )}}" 
+hx-target="#search-cat" hx-swap="beforeend" hx-trigger="load"
 >
 
 <!-- targets the content of the page to swap async only when already-->
@@ -28,7 +29,7 @@ hx-target="#page-content"
 hx-select="#page-content"
 hx-swap="outerHTML show:window:top"
 action="{{ url_for('get_products') }}"
-class="flex items-center relative search  rounded-md">
+class="flex items-center search  rounded-md">
 
     <select 
     id="search-cat"
@@ -45,6 +46,7 @@ class="flex items-center relative search  rounded-md">
       hx-target="#search-results-container"
       hx-trigger="keyup changed delay:500ms"
       hx-swap="innerHTML"
+      hx-select="unset"
       autocomplete="off"
       name="q"
       id="search-bar"
@@ -60,15 +62,13 @@ class="flex items-center relative search  rounded-md">
     </button>
     
     
-    <div id="search-results-container"
+    <div id="search-results-container" hx-swap-oob="true"
     class="absolute  left-0 w-full z-10 top-[99%] bg-white text-black  shadow-2xl
     ">
     </div>
 
   </div>
 </form>
-
-<!-- hx-get="{{ url_for('get_categories' , with_state=request.endpoint=='get_products' )}}" hx-target="#search-cat" -->
 {%- endmacro %} 
 
 <!-- SEARCH PRODUCTS -->
@@ -100,7 +100,7 @@ class="flex items-center relative search  rounded-md">
       
 {%- endmacro %}
 
-<!-- produc price -->
+<!-- product price -->
 {% macro productPrice(product) -%}
 
 <span class="inline-flex items-start mt-2">

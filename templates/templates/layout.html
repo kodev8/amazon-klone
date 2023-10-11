@@ -71,19 +71,16 @@
           </a>
 
           <!-- cart -->
-          <a href="{{ url_for('cart') }}" class=" hover:outline hover:outline-1 h-full cursor-pointer pr-8 w-fit relative">
-              <img src="{{ url_for('static', filename='assets/cart.svg') }}" class="" alt="">
-                  <span  
-                   id="cart-count" class="absolute top-[50%] left-[50%] -translate-x-[100%] -translate-y-[100%]  text-sm font-bold text-orange-500 ">1</span>
-                  
-              <span class="font-bold absolute left-[50%] bottom-0">Cart</span>
-          </a>
+          <a href="{{ url_for('cart') }}" class="flex   hover:outline hover:outline-1 h-full pl-1 cursor-pointer ">
 
-            <!-- <i class="fa-solid fa-cart-shopping"></i> -->
-              <!-- <span id="cart-banner" class="absolute flex items-center justify-center h-6 w-6 rounded-[50%] bg-orange-500 bottom-[50%] left-[60%] bg">
-                  <span hx-get="{{ url_for('cart_count') }}" hx-trigger="load" 
-                   id="cart-count" class="text-white text-sm"></span>
-              </span>    -->
+            <div class="flex flex-col items-center">
+              <span hx-get="{{ url_for('cart_count') }}" hx-trigger="load" hx-swap="outerHTML"
+              id="cart-count" class="font-bold text-orange-500 absolute"></span>
+              <img src="{{ url_for('static', filename='assets/cart.svg') }}" class="-translate-x-1" alt="">
+            </div>
+            
+            <span class="self-end font-bold -translate-x-5 w-5">Cart</span>
+          </a>
 
             <!-- hover drop down -->
            <div id='nav-signin-hover' class="absolute p-4 grid grid-cols-2 gap-y-2 speech-bubble sb-right
@@ -120,9 +117,7 @@
           </div>
       </nav>
       <nav id="nav-bottom" class="flex items-center p-1 justify-start text-white gap-x-4 pl-2 bg-[color:var(--nav-two-bg)] ">
-        <div  
-       onclick="document.querySelector('#side-nav').classList.remove('closed'); document.querySelector('#side-x').classList.remove('closed'); document.querySelector('#modal-bg').classList.remove('hidden')"
-        class=" py-2 cursor-pointer font-medium ml-2 hover:outline hover:outline-1">
+        <div onclick="openSideNav()" class=" py-2 cursor-pointer font-medium ml-2 hover:outline hover:outline-1">
           <i class="fa-solid fa-bars"></i>
           <span>All</span>
         </div>
@@ -134,8 +129,7 @@
     </header>
       <!-- end of nav -->
 
-    <i id="side-x"onclick="this.nextElementSibling.classList.add('closed'); document.querySelector('#modal-bg').classList.add('hidden'); this.classList.add('closed')" 
-          class="closed absolute fa-solid fa-xmark text-white text-3xl left-[320px] top-4 cursor-pointer z-[60]"></i>
+        <i id="side-x" onclick="closeSideNav()" class="closed absolute fa-solid fa-xmark text-white text-3xl left-[320px] top-4 cursor-pointer z-[60]"></i>
 
         <div id="side-nav" class="no-scrollbar closed h-screen overflow-y-auto  overflow-x-hidden top-0 z-[60] left-0 absolute w-[310px] bg-red-500">
           {% if current_user.is_authenticated -%}
