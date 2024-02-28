@@ -1,0 +1,126 @@
+{% extends 'templates/account.template.html' %}
+{% from 'components/amazon.html' import customButton %}
+{% from './components/notifs.html' import oob_notif %}
+
+
+{% block account_content %}
+
+{% if message_only %}
+
+{{ oob_notif(message_only, type, link) }}
+
+
+{% else %}
+    <span class="font-medium"> Details</span>
+    <div class="grid grid-cols-2 bg-gray-100 mb-8 p-6 rounded-lg gap-4
+    [&>*]:rounded-lg [&>*]:p-2  [&>*]:font-medium
+    ">
+
+        <span class="bg-white">Order#: </span>      <span class="bg-black text-white">{{ order._id }}</span>
+        <span class="bg-white">Date: </span>      <span class="bg-black text-white">{{order.paidAt.strftime('%H:%M %b %d, %y' ) }} </span>
+        <span class="bg-white">Tax: </span>      <span class="bg-black text-white">{{order.tax}} </span>
+        <span class="bg-white">Shipping: </span>      <span class="bg-black text-white">{{order.shipping}} </span>
+        <span class="bg-white">Total (products) </span>      <span class="bg-black text-white">{{order.sub_total}} </span>
+        <span class="bg-white">Order Total: </span>      <span class="bg-black text-white">{{order.with_tax }} </span>
+    </div>
+
+
+  
+    <span class="font-medium"> Order Items </span>
+
+    <div class="flex flex-col">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div class="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Item
+                                </th>
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Category
+                                </th>
+
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Quantity
+                                </th>
+
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Unit Price
+                                </th>
+
+                                <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    Sub Cost
+                                </th>
+    
+                                <th scope="col" class="relative py-3.5 px-4">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody  class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+
+                                {% for product in order.get("items") -%}
+
+                                    <tr>
+                                        <form>
+                                            <td class="px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
+                                                
+                                                <a href="{{ url_for('product', product=product._id) }}" class="hover:underline" hx-target="#page-content" hx-select="#page-content" >
+                                                    {{ product.title[:25]}}{% if product.title|length > 25  %}...{% endif %}
+                                                </a>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                                                {{ product.category_display }}
+                                            </td>
+
+                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                                                {{ product.qty }}
+                                            </td>
+
+                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                                                {{ product.price }}
+                                            </td>
+
+                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                                                {{ product.sub_cost }}
+                                            </td>
+                                            
+                                            <td class="px-4 py-4 text-sm whitespace-nowrap">
+                                                <div class="flex items-center gap-x-6">
+
+                                                    <span  hx-post="{{ url_for('checkout-single') }}" hx-include="next .info-row" hx-target="body" hx-push-url="true">
+                                                        {{ customButton('Buy Again! ', color='bg-orange-300', hoverColor='bg-orange-500', classes='text-xs') }}
+                                                    </span>
+
+                                                    <span class="info-row">
+                                                        <input type="hidden" name="product" value="{{product._id}}">
+                                                        <input type="hidden" name="qty" value="1">
+                                                    </span>
+
+                                                </div>
+                                            </td>
+
+                                        </form>
+
+                                    </tr>
+
+                                {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if message %}
+        {{ oob_notif(message, type, link) }}
+    {% endif %}
+
+{% endif %}
+
+
+ 
+
+{% endblock account_content %}

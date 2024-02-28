@@ -4,14 +4,14 @@
 {% extends 'templates/noAuth-login-register.html' %} 
 
 {% block bottom_content %}
-<!-- hx-boost="true"x -->
-
   <form
-    method="POST"
-    hx-target="#messages"
-    hx-swap="innerHTML"
-    novalidate
-    class="grid gap-y-8 gap-x-2 w-[300px] bg-white border border-solid border-slate-300 shadow-sm rounded-xl p-6"
+  method="POST"
+  hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
+  hx-swap="innerHTML"
+  hx-target="body"
+  novalidate
+  class="grid gap-y-4 gap-x-2 w-[300px] bg-white border border-solid border-slate-300 shadow-sm rounded-xl p-6"
+   
   >
     <h4 class="text-3xl text-black font-medium">
       Sign In
@@ -28,8 +28,8 @@
 <a href="{{ url_for('register')  }}">
 
   {{ customButton('Create Your amazon account', 
-color='white', 
-hoverColor='gray-100',
+color='bg-white', 
+hoverColor='bg-gray-100',
 classes='text-black border border-slate-200 shadow-sm' ) }}
 </a>
 

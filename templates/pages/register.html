@@ -12,23 +12,18 @@
   method="POST"
   novalidate
   action="{{ url_for('register') }}"
-  hx-target="#messages"
-  hx-swap="innerHTML"
-class="grid sm:grid-cols-2 gap-y-8 gap-x-2"
+  hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
+  hx-target="body"
+class="grid sm:grid-cols-2 max-w-xl gap-y-3 gap-x-2 "
 >
 <h4 class="text-3xl text-black font-medium col-span-full">
 Create Account
 </h4>
 
 {% for field in form %} 
-    {% if field.type=='SubmitField' %}
-      <span class="mt-8 col-span-full">
-      {{ customInput(field, field.id) }} 
-      </span>
-    {%else%}
+  
     {{ customInput(field, field.id in ['username','email', 'dob']) }} 
 
-    {% endif %}
 
 
 {% endfor %}

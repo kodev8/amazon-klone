@@ -2,6 +2,6 @@
 
 {% for formID, messages in errors.items() %}
     {% for message in messages -%}
-        {{inlineError(formID, message, true)}}
+        {{inlineError(formID, message, swap=true, icon=true)}}
     {% endfor %}
 {%- endfor %}

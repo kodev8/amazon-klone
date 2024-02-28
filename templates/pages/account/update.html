@@ -1,5 +1,26 @@
+{% from 'components/forms.html' import accountForm, resetPasswordForm %}
+{% from 'components/modal.html' import modalBG %}
+
+
+{% set back_to = url_for('account_update') %}
+{% if reset_context.get('active') %}
+
+    {% set resource = resetPasswordForm(
+      form=reset_context['form'], 
+    )
+    %}
+
+    {% set modal = modalBG(
+      show=true, 
+      content=resource,
+      swap=false, 
+      title="Reset Password", 
+      back_to=back_to) 
+    %}
+
+{% endif %}
+
 {% extends 'templates/account.template.html' %}
-{% from 'components/forms.html' import accountForm %}
 
 
 {% block account_content %}

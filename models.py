@@ -3,17 +3,21 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import mapped_column, relationship
 from flask_login import UserMixin
 from datetime import datetime
+from config import orders
 from sub.Product import Product
 
 
 class Base(DeclarativeBase):
     pass
 
+def prefix_table(table):
+    return f'amazon_{table}'
+
 db = SQLAlchemy(model_class=Base)
  
 # USERS
 class User(db.Model, UserMixin):
-    __tablename__ = 'users'
+    __tablename__ = prefix_table('users')
     id = mapped_column(db.Integer(), primary_key=True)
     fname = mapped_column(db.String(50), nullable=False)
     lname = mapped_column(db.String(50), nullable=False)
@@ -28,11 +32,6 @@ class User(db.Model, UserMixin):
     order_by='Address.is_default.desc()'
     )   
 
-
-    orders = relationship(
-    'Order',
-    back_populates='user',
-    )   
 
     favourites = relationship(
     'Favourite',
@@ -50,11 +49,16 @@ class User(db.Model, UserMixin):
         return  db.session.scalars(query).first()
     
     
+    def get_orders(self):
+         return orders.find({'user_id': self.id})
+    
+    
+    
 class Address(db.Model):
 
-    __tablename__ = 'addresses'
+    __tablename__ = prefix_table('addresses')
     id = mapped_column(db.Integer(), primary_key=True, autoincrement=True)
-    user_id = mapped_column(db.ForeignKey('users.id'), )
+    user_id = mapped_column(db.ForeignKey(User.id), )
     line1 =  mapped_column(db.String(255), nullable=False)
     city =  mapped_column(db.String(255), nullable=False)
     country =  mapped_column(db.String(255), nullable=False)
@@ -67,26 +71,11 @@ class Address(db.Model):
     back_populates='addresses',
     )  
 
-class Order(db.Model):
-    __tablename__ = 'orders'
-    order_id = mapped_column(db.Integer(), primary_key=True, autoincrement=True)
-    user_id = mapped_column(db.ForeignKey('users.id'), nullable=False)
-    product_id =  mapped_column(db.String(255), nullable=False)
-    ordered_at = mapped_column(db.Date(), nullable=False, default=datetime.today())
-    # pending, complete, canceled, refunded
-    status = mapped_column(db.String(10), nullable=False)
-
-
-    user = relationship(
-    'User',
-    back_populates='orders',
-    )   
-
 
 # FAVOIRTIES
 class Favourite(db.Model):
-    __tablename__ = 'favourites'
-    favourite_user = mapped_column(db.ForeignKey('users.id'), primary_key=True, nullable=False)
+    __tablename__ = prefix_table('favourites')
+    favourite_user = mapped_column(db.ForeignKey(User.id), primary_key=True, nullable=False)
     product_id = mapped_column(db.Integer(), primary_key=True, nullable=False)
     favourited_at = mapped_column(db.DateTime(),nullable=False, default=datetime.now())
 
@@ -96,9 +85,6 @@ class Favourite(db.Model):
     )   
 
     def get_product(self):
-    
-        if not hasattr(self, 'product'):
-            print('mergin producr')
-            self.product = Product(self.product_id)
+        return Product(self.product_id)
 
     
