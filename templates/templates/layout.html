@@ -5,13 +5,13 @@
 
   <div id="main" class="w-full h-full grid grid-cols-1 grid-rows-[auto_1fr]">
 
-      <header class="h-full w-full sticky top-0 z-40">
+      <header class="w-full sticky top-0 z-40">
 
           <nav id="nav-top" class="flex items-center justify-between text-white py-2 px-8 gap-x-2 
           bg-[var(--nav-one-bg)] relative">
 
           <!-- logo -->
-          <a hx-boost="false" href="{{ url_for('index', ref='logo-nav') }}" class=" flex items-center justify-center hover:outline  hover:outline-1 h-full cursor-pointer pt-2  px-2">
+          <a hx-init-carousels href="{{ url_for('index', ref='logo-nav') }}" class=" flex items-center justify-center hover:outline  hover:outline-1 h-full cursor-pointer pt-2  px-2">
             <img src="{{ url_for('static', filename='assets/logos/logo-w.png') }}" class="aspect-auto h-[40px]" alt="">
           </a>
 
@@ -26,7 +26,7 @@
           {%- endif %}
           
           <!-- address -->
-          <div {% if not addr and current_user.is_anonymous %}
+          <div {% if current_user.is_anonymous %}
              hx-get="{{ url_for('account_address_anon', update='add') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click" 
              {% endif %}
           class=" grid grid-cols-[auto_1fr] items-center hover:outline hover:outline-1 h-full cursor-pointer  px-2">
@@ -39,11 +39,23 @@
                 {% endif -%}</p>
 
               <p id='addr-text' class="font-bold text-sm">
-                  {% if addr -%}
-                    {{addr.city[:10]}} {% if addr.city | length > 10 %}...{% endif %}{{addr.zip_code}}
-                  {% else %}
-                      Enter Your Address
+
+                {% if current_user.is_authenticated -%}
+
+                  {% if current_user.addresses -%}
+                    {% set addr = current_user.addresses[0] %}
                   {%- endif %}
+      
+                {% else %}
+                  {% set addr = session.get('address') %}
+                {%- endif %}
+
+                {% if addr -%}
+                  {{addr.city[:10]}}{% if addr.city | length > 10 %}... {% endif %}{{addr.zip_code}}
+                {% else %}
+                    Enter Your Address
+                {%- endif %}
+                
               </p> 
             </div>
           </div>
@@ -58,6 +70,7 @@
           hx-target="#page-content"
           hx-select="#page-content"
           hx-swap="outerHTML show:window:top"
+          hx-scroll-top
           id='nav-signin' class="flex justify-center items-center hover:outline hover:outline-1 h-full cursor-pointer relative  px-2 ">
 
             <div class="pointer-events-none">
@@ -71,11 +84,24 @@
           </a>
 
           <!-- cart -->
-          <a href="{{ url_for('cart') }}" class="flex   hover:outline hover:outline-1 h-full pl-1 cursor-pointer ">
+          <a href="{{ url_for('get_cart') }}"  
+          hx-target="#page-content"
+          hx-select="#page-content"
+          hx-scroll-top
+          preload="mousedown"
+          preload-images="truef"
+          hx-swap="outerHTML show:window:top" class="flex ho ver:outline hover:outline-1 h-full pl-1 cursor-pointer ">
 
-            <div class="flex flex-col items-center">
-              <span hx-get="{{ url_for('cart_count') }}" hx-trigger="load" hx-swap="outerHTML"
-              id="cart-count" class="font-bold text-orange-500 absolute"></span>
+            <div 
+            class="flex flex-col items-center">
+              <span 
+              hx-get="{{ url_for('cart_count') }}" 
+              id="cart-count" 
+              hx-trigger="load" 
+              hx-swap="outerHTML"
+              hx-target="#cart-count"
+              hx-select="#cart-count"
+              class="font-bold text-orange-500 absolute"></span>
               <img src="{{ url_for('static', filename='assets/cart.svg') }}" class="-translate-x-1" alt="">
             </div>
             
@@ -83,7 +109,7 @@
           </a>
 
             <!-- hover drop down -->
-           <div id='nav-signin-hover' class="absolute p-4 grid grid-cols-2 gap-y-2 speech-bubble sb-right
+           <div id='nav-signin-hover' class="absolute p-4 grid grid-cols-2 gap-y-2 speech-bubble sb-right z-30
            border border-solid border-slate-200 shadow-xl min-w-[300px] bg-white text-black rounded-md invisible " >
 
            {% if current_user.is_anonymous -%}
@@ -116,7 +142,7 @@
             
           </div>
       </nav>
-      <nav id="nav-bottom" class="flex items-center p-1 justify-start text-white gap-x-4 pl-2 bg-[color:var(--nav-two-bg)] ">
+      <nav id="nav-bottom" class="flex items-center p-1 justify-start text-white gap-x-4 pl-2 bg-[color:var(--nav-two-bg)] [&>*]:cursor-pointer ">
         <div onclick="openSideNav()" class=" py-2 cursor-pointer font-medium ml-2 hover:outline hover:outline-1">
           <i class="fa-solid fa-bars"></i>
           <span>All</span>
@@ -131,28 +157,33 @@
 
         <i id="side-x" onclick="closeSideNav()" class="closed absolute fa-solid fa-xmark text-white text-3xl left-[320px] top-4 cursor-pointer z-[60]"></i>
 
-        <div id="side-nav" class="no-scrollbar closed h-screen overflow-y-auto  overflow-x-hidden top-0 z-[60] left-0 absolute w-[310px] bg-red-500">
+        <div id="side-nav" class="no-scrollbar flex flex-col closed absolute h-screen  bottom-0 z-[60] left-0 w-[310px] bg-white">
           {% if current_user.is_authenticated -%}
-              <a href="{{ url_for('account') }}" class="flex items-center justify-center py-2 pt-4 text-white text-lg bg-[color:var(--nav-two-bg)] text-center font-medium">Hello {{ current_user.fname }}</a>
+              <a href="{{ url_for('account') }}" class="flex items-center justify-center py-2 pt-4 text-white text-lg bg-[color:var(--nav-two-bg)] text-center font-medium mb-auto">Hello, {{ current_user.fname }}</a>
+              <a  href="{{ url_for('account_orders') }}" class="flex items-center justify-center py-3 text-black border-y border-solid border-slate-200 hover:bg-slate-400 text-center">Your orders</a>
+              <a href="{{ url_for('account_favourites') }}" class="flex items-center justify-center py-3 text-black border-y border-solid border-slate-200 hover:bg-slate-400 text-center">Your Lists</a>
+              <a href="{{ url_for('account') }}" class="flex items-center justify-center py-3 text-black border-y border-solid border-slate-200 hover:bg-slate-400 text-center">Your Account</a>
+              <span hx-post="{{ url_for('logout') }}" class="flex items-center justify-center py-3 text-black border-y border-solid border-slate-200 hover:bg-slate-400 text-center cursor-pointer">Sign Out</a>
+
           {% else %}
-              <a href="{{ url_for('login') }}" class="flex items-center justify-center py-2 pt-4 text-white text-lg bg-[color:var(--nav-two-bg)] text-center font-medium">
+              <a href="{{ url_for('login') }}" class="flex items-center justify-center py-2 pt-4 text-white text-lg bg-[color:var(--nav-two-bg)] text-center font-medium>
                 <i class="fa-solid fa-circle-user mr-2"></i>
                 Hello, Sign In
               </a>
         {%- endif %}
 
-          <div class="bg-gray-200 h-[300px]"></div>
-          <div class="bg-gray-200 h-[300px]"></div>
-          <div class="bg-gray-200 h-[300px]"></div>
-          <div class="bg-gray-200 h-[300px]"></div>
-          
+        
+
+              
 
         </div>
 
-    <div id="page-content" hx-swap="outerHTML" class="w-full bg-slate-100 relative">
+    <div id="page-content" class="w-full bg-slate-100 relative">
+
       <script type="text/javascript" src="{{url_for('static', filename='scripts/defer.js')}}" defer></script>
-          
-      <div id="banner"  class="absolute top-0 w-full z-[70]"></div>
+      <script type="text/javascript" src="{{url_for('static', filename='scripts/panel.js')}}" defer></script>
+
+
       {% block page_content -%}
 
           
@@ -162,14 +193,17 @@
           <!-- if anonymous user -->
 
             <script type="text/javascript" defer>
-
+              
             document.addEventListener("DOMContentLoaded", ()  => {
+
               const mouseenterEvent = new Event('mouseenter');
               const mouseleaveEvent = new Event('mouseleave');
-
               
               setTimeout( // first timeout forr positiong
               ()=>{
+
+                const signin = document.querySelector('#nav-signin')
+                const signinHover = document.querySelector('#nav-signin-hover')
 
                 signin.dispatchEvent(mouseenterEvent)
                 signin.dispatchEvent(mouseleaveEvent)
@@ -177,7 +211,6 @@
                 signinHover.classList.add('opacity-0')
 
                 setTimeout(() => {
-                  console.log('rmeoved invisible')
                   signinHover.classList.remove('invisible')
 
                 }, 100)
@@ -192,6 +225,7 @@
           });
           </script>
       {%- endif %} 
+
   </div>
   <!-- end page content -->
 </div>

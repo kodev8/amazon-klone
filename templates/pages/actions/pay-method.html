@@ -23,30 +23,42 @@ class="col-span-full  max-h-0 noti-close overflow-hidden">
         <span class="text-gray-500">Name on card</span>
         <span class="text-gray-500">Expires on</span>
 
+        {{ separator() }}
+
+        <!-- detail card -->
+
+        <span><input type="radio" name="payrow" checked></span>
+        <span class="col-span-2 text-sm"><i class="fa-regular fa-credit-card  mr-2"></i>Default Master Card ending in 9999</span>
+
+        <span claas="">{{ current_user.fname }} {{ current_user.lname }}</span>
+
+        <span class="tetx-sm">12/2023</span>
+
+        <!-- detail card -->
 
         {{ separator() }}
 
 
-        <!-- detail card -->
+        <span><input type="radio" name="payrow"></span>
+        <span class="col-span-2 text-sm "><i class="fa-regular fa-credit-card  mr-2"></i>Default Visa Card ending in 0000</span>
 
-        <span><input type="radio" checked></span>
-        <span class="col-span-2 text-sm"><i class="fa-regular fa-credit-card  mr-2"></i>Default Maseter Card ending in 9999</span>
+        <span claas="">{{ current_user.fname }} {{ current_user.lname }}</span>
 
-        <span claas="text-sm">{{ current_user.fname }} {{ current_user.lname }}</span>
-
-        <span class="tetx-sm">12/2023</span>
+        <span class="tetx-sm">12/2025</span>
+        
         
     </div>
 
 </div>
 
 {# TODO add oob delay #}
-<span id="pay-actions" hx-swap-oob="outerHTML" 
-hx-post="{{url_for('create_order')}}" 
+<span 
+id="pay-actions" hx-swap-oob="outerHTML" 
+hx-post="{{url_for('create_order', )}}" 
+hx-include="#order-id"
 hx-trigger="click" 
 
 >
-
-    {{ customButton('Confirm Payment', color='yellow-300', classes='!font-light !text-sm')}}
+    {{ customButton('Confirm Payment', classes='!font-light !text-sm')}}
 </span>
     

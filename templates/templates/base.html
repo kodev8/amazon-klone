@@ -11,20 +11,20 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}"></link>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/favicon.ico') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
-
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <script src="{{ url_for('static', filename='scripts/htmx.js') }}"></script>
-    <script src="{{ url_for('static', filename='scripts/class-tools.js') }}"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/multi-swap.js"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
+     <!-- htmx -->
+     <script src="https://unpkg.com/htmx.org@1.9.8" integrity="sha384-rgjA7mptc2ETQqXoYC3/zJvkU7K/aP44Y+z7xQuJiVnB/422P/Ak+F/AqFR7E4Wr" crossorigin="anonymous"></script>
+     <script src="https://unpkg.com/htmx.org/dist/ext/class-tools.js"></script>
+     <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
+     <script src="https://unpkg.com/htmx.org/dist/ext/multi-swap.js"></script>
+     <script src="https://unpkg.com/htmx.org/dist/ext/preload.js"></script>
 
     <script type="text/javascript" src="{{url_for('static', filename='scripts/main.js')}}"></script>
-
-
     <title>Amazon</title>
 </head>
-<body hx-boost="true" hx-ext="multi-swap">
+<body hx-boost="true" hx-ext="multi-swap,response-targets,class-tools,preload" id="body">
+    
     <div id="messages"  class="fixed w-full z-[70]"> 
         {% with messages = get_flashed_messages(with_categories=true) -%}
             {% if messages -%}
@@ -33,31 +33,46 @@
                 {%- endfor %}
             {%- endif %}
         {%- endwith %}
-
     </div>
-    {{ modalBG(false) }}
-    <div class="relative h-full w-full">
 
-        {% block content %}
+    {% if modal %}
+        {{ modal }}
+    {% else %}
+        {{ modalBG(false) }}
+    {% endif %}
 
 
-        {% endblock %}
-    </div>
+    {% block content %}
+
+    {% endblock %}
     <script>
-//         htmx.logAll();
-//         htmx.on("htmx:afterRequest", function(evt) {
-//     console.log("The element that dispatched the request: ", evt.detail.elt);
-//     console.log("The XMLHttpRequest: ", evt.detail.xhr);
-//     console.log("The target of the request: ", evt.detail.target);
-//     console.log("The configuration of the AJAX request: ", evt.detail.requestConfig);
-//     console.log("The event that triggered the request: ", evt.detail.requestConfig.triggeringEvent);
-//     console.log("True if the response has a 20x status code or is marked detail.isError = false in the htmx:beforeSwap event, else false: ", evt.detail.successful);
-//     console.log("true if the response does not have a 20x status code or is marked detail.isError = true in the htmx:beforeSwap event, else false: ", evt.detail.failed);
-//     console.log('BREAKE')
-//     console.log(' ')
-// });
+
+        htmx.config.defaultFocusScroll  = false
+        htmx.on("htmx:afterRequest", function(evt) {
+            // issuses with boosted link after request even with server
+        let { requestConfig } = evt.detail
+        if (requestConfig.boosted) {
+            if (requestConfig.elt.hasAttribute('hx-scroll-top')) {
+                document.body.scrollTo({top: 0, behavior: 'instant'}) 
+            }else if (requestConfig.elt.hasAttribute('hx-init-carousels')) {
+                window.initCarousels()
+            }
+        }
+    // console.log("The element that dispatched the request: ", evt.detail.elt);
+    // console.log("The XMLHttpRequest: ", evt.detail.xhr);
+    // console.log("The target of the request: ", evt.detail.target);
+    // console.log("The configuration of the AJAX request: ", evt.detail.requestConfig);
+    // console.log("The event that triggered the request: ", evt.detail.requestConfig.triggeringEvent);
+    // console.log("True if the response has a 20x status code or is marked detail.isError = false in the htmx:beforeSwap event, else false: ", evt.detail.successful);
+    // console.log("true if the response does not have a 20x status code or is marked detail.isError = true in the htmx:beforeSwap event, else false: ", evt.detail.failed);
+    // console.log('BREAKE')
+    // console.log(' ')
+});
+    panel()
+
+    
     </script>
-    <script src="{{ url_for('static', filename='scripts/flowbite.min.js') }}" defer></script>
-    <script type="text/javascript" src="{{url_for('static', filename='scripts/panel.js')}}" defer></script>
+     <script src="{{ url_for('static', filename='scripts/flowbite.min.js') }}" defer></script>
+
 </body>
 </html>

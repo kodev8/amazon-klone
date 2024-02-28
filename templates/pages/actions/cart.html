@@ -9,7 +9,7 @@ customButton, productQty, cartProduct, suggestedProduct with context %}
 
 <div class="h-full flex flex-col">
 
-    <div class="bg-white border border-gray-200 shadow-sm p-6">
+    <div id="cart-content" class="bg-white border border-gray-200 shadow-sm p-6">
 
         <!-- cart header -->
         {% if cart_products | length > 0 %}
@@ -20,11 +20,36 @@ customButton, productQty, cartProduct, suggestedProduct with context %}
             <span class="text-4xl">
                 Shopping Cart
             </span>
-            <span id="subtotal-message"></span>
+            <!-- set onload -->
+            {% if sub_total %}
+
+            <span id="subtotal-message" class=text-sm> 
+                <span hx-post="{{ url_for('selected_subtotal', how='none') }}" 
+                hx-select="#center-subtotal,#side-subtotal,#subtotal-message" 
+                hx-swap="multi:#center-subtotal:outerHTML,#side-subtotal:outerHTML,#subtotal-message:outerHTML" 
+                hx-trigger="click[select('none')]"
+                class="text-blue-400 cursor-pointer">Deselect all items</span>
+            </span>
+
+            {% else %}
+
+            <span id="subtotal-message" class=text-sm> 
+                No items selected
+                <span 
+                hx-post="{{ url_for('selected_subtotal', how='all' ) }}"
+                 hx-select="#center-subtotal,#side-subtotal,#subtotal-message" 
+                hx-swap="multi:#center-subtotal:outerHTML,#side-subtotal:outerHTML,#subtotal-message:outerHTML"
+                hx-trigger="click[select('all')]"
+                class="text-blue-400 cursor-pointer">
+                    Select all items
+                </span>
+            </span>
+                
+            {% endif %}
         </div>
 
         <!-- cart items -->
-        <div class="flex flex-col  ">
+        <div id="cart-list" class="flex flex-col  ">
 
                 {% for product in cart_products  %}
                     {{ cartProduct(product) }}
@@ -32,23 +57,41 @@ customButton, productQty, cartProduct, suggestedProduct with context %}
         </div>
 
         <div class="flex justify-end text-lg">
-            <span hx-post="{{ url_for('selected_subtotal') }}" hx-swap="outerHTML" hx-target="this" hx-trigger="load"
+
+            {% if sub_total %}
+                
+            <span
             id="center-subtotal"
             class="subtotal" >
+                <span>Subtotal ({{ sub_count}} item{% if sub_count != 1 %}s{% endif %}): <span class="font-bold">{{sub_total}}</span></span>
+
             </span>
+            {% else %}
+
+            <span id="center-subtotal" class="hidden"></span>
+
+
+            {% endif %}
 
         </div>
 
         {% else %}
 
             <!-- no products -->
-        <div class="flex p-4">
+        <div id="cart-list" class="flex p-4">
 
             <img src="{{ url_for('static', filename='assets/empty_cart.svg') }}" class="max-h-[100px] w-auto">
             <div class="flex flex-col items-start pl-8 justify-center">
                 <span class="text-4xl font-medium">Your cart is empty</span>
-                <span><a hx-boost='false' href= "{{ url_for('index') }}" class="text-blue-400 underline">Continue shopping</a> to add more items to your Cart!</span>
-            
+                <!-- 
+                    hx-target="#page-content" hx-select="#page-content" hx-swap="outerHTML show:no-scroll" hx-scroll-top
+                 -->
+                <span>
+                    <a href= "{{ url_for('index') }}" hx-init-carousels
+                        class="text-blue-400 underline">Continue shopping
+                    </a>to add more items to your Cart!
+                </span>
+                   
 
                 {% if current_user.is_anonymous %}
                 <div class="flex pt-4 gap-x-4">
@@ -58,7 +101,7 @@ customButton, productQty, cartProduct, suggestedProduct with context %}
                     </a>
 
                     <a href="{{ url_for('register') }}">
-                        {{ customButton('Sign up now', color='white', hoverColor ='slate-200', classes='border border-solid border-slate-400') }}
+                        {{ customButton('Sign up now', color='bg-white', hoverColor ='bg-slate-200', classes='border border-solid border-slate-400') }}
                     </a>
 
                 </div>
@@ -80,8 +123,18 @@ customButton, productQty, cartProduct, suggestedProduct with context %}
 
     <!-- side dispalu -->
     <div class="flex flex-col">
-        {% if cart_products | length > 0 %}
-            <div id="side-subtotal" class="absolute"></div>
+        {% if sub_total %}
+            <div id="side-subtotal"
+            class="bg-white rounded-sm border border-solid border-slate-300 p-4 w-64 h-fit flex flex-col gap-y-4 mb-4" >
+            
+                <span>Subtotal ({{ sub_count}} item{% if sub_count != 1 %}s{% endif %}): <span class="font-bold">{{sub_total}}</span></span>
+        
+                <a href="{{ url_for('checkout') }}">
+                    {{ customButton('Proceed to checkout', classes='p-1 text-xs') }}
+                </a>
+            </div>
+        {% else %}
+        <div id="side-subtotal" class="hidden"></div>
         {% endif %}
         <div class="
         {% if not suggested or suggested | length <= 0 %} opacity-0 {% endif %}

@@ -1,4 +1,4 @@
-<!-- side nav tab
+<!-- side nav tabload
 hx-get="{{ url_for('get_categories' , with_state=request.endpoint=='get_products' )}}" hx-target="#search-cat" hx-swap="beforeend" hx-trigger="load"
     id="search-results-container" hx-swap-oob="true"  -->
 {% macro sideTab(icon, text) -%}
@@ -27,27 +27,28 @@ hx-target="#search-cat" hx-swap="beforeend" hx-trigger="load"
 method="GET"
 hx-target="#page-content"
 hx-select="#page-content"
-hx-swap="outerHTML show:window:top"
-onsubmit="this.querySelector('input')?.blur()"
+hx-swap="outerHTML show:window:top transition:true"
+onsubmit="this.querySelector('input')?.blur();"
 action="{{ url_for('get_products') }}"
 class="flex items-center search  rounded-md">
 
     <select 
     id="search-cat"
     name="category"
-    class="bg-gray-200 border-[3px] border-solid text-slate-700 text-xs h-12 px-2 focus:border-yellow-500 rounded-l-md w-20">
-    <option value="" >All</option>
+    class="bg-gray-200 border-[3px] border-solid text-slate-700 text-xs h-12 px-2 focus:border-yellow-500 rounded-l-md">
   </select>
 
     <div class="relative flex items-center w-full">
       <input
       onfocus="this.closest('form').classList.add('outline', 'outline-yellow-500')"
-      onblur="this.closest('form').classList.remove('outline',  'outline-yellow-500')"
+      onblur="this.closest('form').classList.remove('outline',  'outline-yellow-500');"
       hx-get="{{ url_for('search') }}"
       hx-target="#search-results-container"
       hx-trigger="keyup changed delay:500ms"
       hx-swap="innerHTML"
       hx-select="unset"
+      hx-include="#search-cat"
+      hx-sync="this:replace"
       autocomplete="off"
       name="q"
       id="search-bar"
@@ -55,17 +56,17 @@ class="flex items-center search  rounded-md">
       {% if request.args.get("q")  -%}
         value="{{request.args.get('q')}}"
       {%- endif %}
-      class="border-none outline-none text-black bg-transparent w-full bg-white h-12 px-2"
+      class="border-none outline-none text-black w-full bg-white h-12 px-2"
     />
     <button>
       <i class="fa-solid fa-magnifying-glass text-black ml-auto cursor-pointer  rounded-r-md
     bg-yellow-300 hover:bg-yellow-500 text-2xl h-12 p-2 px-3"></i>
     </button>
     
-    
+
+    <!-- swap oob for clearing container when a result is clicked -->
     <div id="search-results-container" hx-swap-oob="true"
-    class="absolute  left-0 w-full z-10 top-[99%] bg-white text-black  shadow-2xl
-    ">
+    class="absolute  left-0 w-full z-10 top-[99%] bg-white text-black  shadow-2xl">
     </div>
 
   </div>
@@ -75,7 +76,7 @@ class="flex items-center search  rounded-md">
 <!-- SEARCH PRODUCTS -->
 {% macro searchProducts(product) -%}
   <a  href="{{ url_for('product', product=product.get('_id')) }}" hx-target="#page-content" hx-select="#page-content" 
-      class="font-medium text-md pl-4 hover:bg-gray-200 py-3 flex w-full">
+      class="font-medium text-md pl-4 hover:bg-gray-200 py-3 flex items-center w-full">
     {{product.get('title')}} <span class="ml-2 text-sm font-light"> | {{product.category_display}}
     </span> 
   </a>
@@ -149,10 +150,9 @@ class="flex items-center search  rounded-md">
 <!-- product qantity -->
 {% macro productQty(product, oncart=false) -%}
 
+
   {% if product.get('stock', 0) > 0 -%}
 <input type="hidden" name="product" value="{{product.get('_id')}}"></input>
-
-
                     
     {% if product.get('stock', 0) > 9 -%}
 
@@ -160,14 +160,14 @@ class="flex items-center search  rounded-md">
             
     {% else %}
 
-        {% set max = product.get('stock')%}
+        {% set max = product.get('stock') + 1 %}
         
     {%- endif %}
       
     <!-- https://stackoverflow.com/questions/899148/html-select-option-separator -->
     {% if not oncart or (oncart and product.get('qty') < 10) -%}
 
-        <div class="w-fit h-fit pl-1 pr-3 flex items-center rounded-xl text-xs border border-solid border-gray-400 bg-gray-200 relative">
+        <div class="w-fit h-fit pl-1 pr-3 flex items-center rounded-xl text-xs border border-solid border-gray-400 bg-gray-200 relative transition-[outline] duration-300">
 
           <span class="mr-8">Qty: </span>
 
@@ -179,7 +179,7 @@ class="flex items-center search  rounded-md">
                   class="absolute bg-transparent w-full left-0 " style="text-align-last:right;" >
             <!-- to display also as selected -->
 
-              {% for i in range (1, max+1) -%}
+              {% for i in range (1, max) -%}
 
                 {# display the user qty in cart but not on base product page #}
                 {% if i  == product.get('qty') and oncart -%}
@@ -223,14 +223,14 @@ class="flex items-center search  rounded-md">
 {% if product.get('qty') > 10 -%}
   {% set listener = listener +  ", click from:find button" %}
 {% else %}
-{% set listener = listener + ", change[selectQty(event)] from:find [name='qty']" %}
+  {% set listener = listener + ", change[selectQty(event)] from:find [name='qty']" %}
 {%- endif %}
 
 <form
 action="{{url_for('selected_subtotal', how='update')}}" 
 method="POST"
-hx-target="#center-subtotal" 
-hx-swap="outerHTML show:unset" 
+hx-select="#center-subtotal,#side-subtotal,#subtotal-message,#cart-count" 
+hx-swap="multi:#center-subtotal:outerHTML,#side-subtotal:outerHTML,#subtotal-message:outerHTML,#cart-count:outerHTML" 
 hx-trigger="{{listener}}"
 hx-push-url="false"
 >
@@ -238,7 +238,6 @@ hx-push-url="false"
 <div class="cart-product flex py-8 w-full gap-x-8 pb-6 border-b border-b-solid border-slate-300">
   <!-- check box -->
   <div class="flex items-center">
-
 
       <input 
       name="selected" type="checkbox" 
@@ -248,21 +247,26 @@ hx-push-url="false"
       <input type="hidden" name="product" value="{{ product.get('_id') }}">
   </div>
 
-  <img src="{{ product.thumbnail }}" class="mix-blend-multiply max-h-[200px] w-auto" alt="">
+  <img src="{{ product.thumbnail }}" class="mix-blend-multiply h-48 w-48 object-scale-down" alt="">
   <!-- </div> -->
 
-  <div class="flex flex-col gap-y-4">
-      <a  hx-target='#page-content' hx-select="#page-content" href="{{ url_for('product', product=product.get('_id')) }}" hx-push-url="true" class="text-3xl w-fit hover:underline hover:text-blue-300">{{product.title}}</a>
+  <div hx-select="unset" class="flex flex-col gap-y-4">
+      <a  hx-target='#page-content' hx-select="#page-content" hx-swap="outerHTML transition:true" href="{{ url_for('product', product=product.get('_id')) }}" hx-push-url="true" class="text-3xl w-fit hover:underline hover:text-blue-300">{{product.title}}</a>
       <span class="font-bold texr-xl">${{product.get('price')}}</span>
       <span>{{ productStock(product, size='sm') }}</span>
 
       {{ productQty(product, oncart=true) }}
 
       <div class="flex">
-          <span hx-delete="{{ url_for('cart_delete', product=product.get('_id')) }}" hx-swap="none"
+          <span 
+          hx-delete="{{ url_for('cart_delete', product=product.get('_id')) }}" 
+          hx-select="#side-subtotal,#cart-count,#cart-content"
+          hx-swap="multi:#side-subtotal:outerHTML,#cart-count:outerHTML,#cart-content:outerHTML"
            class="text-xs text-red-600 px-2 border-r-2 border-solid  border-gray-200  cursor-pointer hover:underline">
               Delete
           </span>
+          <!-- transition:true" -->
+
 
           {% if current_user.is_authenticated %}
             <span hx-post="{{ url_for('account_favourites')}}" hx-trigger="click" hx-include="closest form"  hx-swap="none"
@@ -297,11 +301,13 @@ hx-push-url="false"
         <span
         hx-post="{{url_for('cart_add_suggested')}}"
         hx-include="closest form"
-        hx-swap="none"
+        hx-select="#page-content,#cart-count"
+        hx-swap="multi:#page-content:outerHTML,#cart-count:outerHTML"
         >
             {{ customButton('Add to Cart', classes='text-xs !p-1', as_submit=false) }}
         </span>
         <input type="hidden" name="product" value="{{ product.get('_id') }}">
+        <!-- transition:true -->
 
 
     </div>
@@ -313,8 +319,8 @@ hx-push-url="false"
 <!-- CUSTOM BUTTON -->
 {% macro customButton(
         text,
-        color='yellow-300',
-        hoverColor='yellow-500', 
+        color='bg-yellow-300',
+        hoverColor='bg-yellow-500', 
         icon=none, 
         classes="text-black", 
         as_submit=truem
@@ -323,7 +329,7 @@ hx-push-url="false"
 
   <button
     {% if not as_submit -%} type="button" {%- endif %} 
-    class="w-full col-span-full px-4 py-2 flex items-center justify-center rounded-xl bg-{{color}} {{ classes }} hover:bg-{{hoverColor}}"
+    class="w-full col-span-full px-4 py-2 flex items-center justify-center rounded-xl {{color}} {{ classes }} hover:{{hoverColor}}"
   >
     {% if icon -%}
     <i class="{{icon}} mr-4"></i>
@@ -361,7 +367,7 @@ hx-push-url="false"
   {% elif status=='pending' %}
 
   <div class="inline-flex items-center px-3 py-1 text-yellow-700 rounded-full gap-x-2 bg-yellow-500/60 dark:bg-gray-800">
-    <i class="fa-solid fa-spinner"></i>
+    <i class="fa-solid fa-spinner animate-spin"></i>
 
     <h2 class="text-sm font-normal">Pending</h2>
 </div>

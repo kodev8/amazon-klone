@@ -8,16 +8,13 @@ function updateSelect(){
   var selectedText = selectId.options[selectId.selectedIndex].text;
   selectId.style.width = 30 + (selectedText.length * 8) + "px";
   let searchBar = document.querySelector('#search-bar')
-  searchBar.focus()
+   searchBar.focus()
 
-  // https://stackoverflow.com/questions/511088/use-javascript-to-place-cursor-at-end-of-text-in-text-input-element
-  
 searchBar.setSelectionRange(-1, -1)
 
 }
 
 if (selectId){
-selectId.addEventListener('load', updateSelect)
 selectId.onchange=updateSelect
 
 }
@@ -100,5 +97,3 @@ event.target.style.minHeight = `${event.target.scrollHeight}px`;
 textareas.forEach(textarea => textarea.addEventListener('input', resizeTextarea));
 
 }
-
-

@@ -20,16 +20,16 @@
               <!-- filter by rating  -->
             {% for count in range(4, 0, -1)  -%}
             <a
-            {% if star_underline == count -%}
-                class="border-b border-solid border-yellow-500 w-fit"   
-            {%- endif %}
+            
+                class="{% if star_underline == count -%}border-b border-solid border-yellow-500{%- endif %} w-fit"   
+            
             id="rating{{count}}"
             href="{{ url_for(request.endpoint, rating_gt=count, **request.args | filter_args('rating_gt')) }}"
             hx-trigger="click from:find .filter"
             hx-target="#products-results" 
             hx-select="#products-results"
-            hx-swap="outerHTML show:unset"
-
+            hx-swap="outerHTML show:no-scroll transition:true"
+            hx-scroll-top
             hx-select-oob="#product-filter"
             hx-push-url="true"
             >
@@ -69,7 +69,7 @@
                 hx-trigger="click from:find .filter"
                 hx-target="#products-results" 
                 hx-select="#products-results" 
-                hx-swap="outerHTML"
+                hx-swap="outerHTML show:none focus-scroll:false transition:true"
                 hx-select-oob="#product-filter"
                 hx-push-url="true" 
                 class="w-fit"
@@ -87,8 +87,7 @@
             hx-get="{{ url_for(request.endpoint, **request.args | filter_args('price_max', 'price_min')) }}"
             hx-target="#products-results" 
             hx-select="#products-results" 
-            hx-swap="outerHTML"
-
+            hx-swap="outerHTML show:none focus-scroll:false transition:true"
             hx-select-oob="#product-filter"
             hx-push-url="true" 
             hx-trigger="submit"
@@ -117,12 +116,10 @@
             </form>
         </div>
         <span 
-        
             hx-get="{{ url_for(request.endpoint, **request.args | filter_args('price_max', 'price_min', 'rating_gt', 'q')) }}"
             hx-target="#products-results" 
             hx-select="#products-results" 
             hx-swap="outerHTML"
-
             hx-select-oob="#product-filter"
             hx-push-url="true" 
             hx-trigger="click"
@@ -141,22 +138,26 @@
         {% for product in products -%}
 
             <div class="h-full flex flex-col justify-start border border-gray-100 border-solid rounded-sm">
-                <a href="{{ url_for('product', product=product._id) }}" hx-target="#page-content" hx-select="#page-content" class="bg-gray-100 h-[200px] aspect-auto p-3">
-                    <img src="{{ product.thumbnail }}" alt="" class=" h-full mx-auto mix-blend-multiply">
+                <a href="{{ url_for('product', product=product._id) }}" 
+                hx-target="#page-content" hx-select="#page-content"  hx-swap="outerHTML transition" 
+                class="bg-gray-100 h-[200px] aspect-auto p-3">
+                    <img src="{{ product.thumbnail }}" alt="" class=" h-full mx-auto object-scale-down mix-blend-multiply">
                 </a>
 
                 <div class="p-4 grid gap-y-1">
-                    <a href="{{ url_for('product', product=product._id) }} " hx-target="#page-content" hx-select="#page-content" class="text-lg hover:text-orange-500" >{{ product.title}} </a>
+                    <a href="{{ url_for('product', product=product._id) }}" 
+                    hx-target="#page-content" hx-select="#page-content"  hx-swap="outerHTML" 
+                    class="text-lg hover:text-orange-500" >{{ product.title}} </a>
 
                     <span class="rating-container cursor-pointer relative w-fit">
                         {{ productStars(product) }}
                         <div class="rating invisible speech-bubble sb-center sb-outline right-0 mt-2 !p-1">
-                        <!-- <div class=" rating speechabsolute top-[110%] left-[50%] bg-white p-2 border border-solid border-gray-200 shadow-2xl hidden font-medium"> -->
                             <span>{{ product.rating }}</span>
                         </div>
                     </span>
 
-                    <a href="{{ url_for('product', product=product._id) }}" hx-target="#page-content" hx-select="#page-content" >
+                    <a href="{{ url_for('product', product=product._id) }}" 
+                    hx-target="#page-content" hx-select="#page-content" hx-swap="outerHTML"  >
                         {{ productPrice(product) }}
                     </a>
 

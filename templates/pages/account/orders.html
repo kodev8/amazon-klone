@@ -13,6 +13,8 @@
                         <tr>
                             <th scope="col" class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <div class="flex items-center gap-x-3">
+
+                                {# TODO: toggle order number #}
                                     <!-- <input type="checkbox" onclick="" class="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"> -->
                                     <button class="flex items-center gap-x-2">
                                         <span>Order#</span>
@@ -20,9 +22,6 @@
                                 </div>
                             </th>
 
-                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                Item
-                            </th>
 
                             <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 Date
@@ -42,23 +41,22 @@
                     
                     <tbody id='order-table' hx-swap='true' class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
 
-                        {% if current_user.orders | length > 0 %}
+                        {% if user_orders | length > 0 %}
                             
-                            {% for order in current_user.orders %}
+                            {% for order in user_orders %}
                                 
-                            <tr>
+                            <tr >
                                 <td class="px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
-                                        <span>#{{order.id}}</span>
+                                        <a href="{{ url_for('order_details', order_id=order._id) }}" class="hover:underline">#{{order._id}}</a>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">Jan 6, 2022</td>
+                                </td>
+                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">{{ order.paidAt.strftime('%b %d, %Y') }}</td>
                                 <td class="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
-                                    <div class="inline-flex items-center px-3 py-1 rounded-full gap-x-2 text-emerald-500 bg-emerald-100/60 dark:bg-gray-800">
-                                        
-                                        {{order.order}}
-                                    </div>
+                                    {{orderStatus(order.status)}}
                                 </td>
                                 
-                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">Monthly subscription</td>
+                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap"> {{ order.with_tax }} </td>
+                                
                             </tr>
                             {% endfor %}
 
@@ -72,10 +70,10 @@
                                 <div class="flex flex-col p-8 gap-y-4 items-center justify-center">
                                     <span class="font-bold text-xl">You dont have any orders yet</span>
                                     {% if cart_count > 0 %}
-                                    <a  href="{{ url_for('cart') }}" class="font-medium text-lg underline text-[var(--a-blue)]">Checkout from your Cart Now!</a>
+                                        <a  href="{{ url_for('get_cart') }}" class="font-medium text-lg underline text-[var(--a-blue)]">Checkout from your Cart Now!</a>
 
                                     {% else %}
-                                    <a  hx-boost='false' href="{{ url_for('index') }}" class="font-medium text-lg underline text-[var(--a-blue)]">Start shopping now</a>
+                                        <a  hx-init-carousels href="{{ url_for('index') }}" class="font-medium text-lg underline text-[var(--a-blue)]">Start shopping now</a>
                                     {% endif %}
                                         
                             </div>

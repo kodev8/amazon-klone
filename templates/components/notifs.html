@@ -1,7 +1,7 @@
 {% macro notif(message, type, link) -%}
     <div 
         hx-ext="class-tools"
-        hx-get="/clear" hx-trigger="load delay:5s" hx-target="#messages" hx-swap="innerHTML" 
+        hx-get="/clear" hx-trigger="load delay:3.7s" hx-target="#messages" hx-swap="innerHTML" 
         class="notif overflow-hidden max-h-0 noti-close" 
         classes="remove noti-close & add noti-open:0.2s, remove noti-open:3s & add noti-close:3s" role="alert">
         {% if type == 'error' -%}
@@ -11,7 +11,7 @@
         {% elif type == 'info' %}
             {{ info(message, link) }}
         {% elif type == 'warning' %}
-            {{ warning(message) }}
+            {{ warning(message, link) }}
         {%- endif %} 
     </div>
 {%- endmacro %}
@@ -65,12 +65,16 @@
 
 {% endmacro %}
 
-{% macro warning(message) -%}
+{% macro warning(message, link) -%}
 
     <div onclick="closeNotif(this)" class="flex items-center justify-center bg-yellow-100 text-yellow-500 text-sm font-bold px-4 py-3 cursor-pointer" role="alert">
         <i class="fa-solid fa-triangle-exclamation mr-4"></i>
         <p>{{ message }}</p>
+        {% if link %}
+            <a class="underline ml-2" href="{{link.url}}" hx-boost="false">{{link.text}}</a>
+        {% endif %}
     </div>
 
 {% endmacro %}
+
 

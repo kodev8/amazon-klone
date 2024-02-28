@@ -1,0 +1,36 @@
+{% extends 'templates/layout.html' %}
+{% from 'components/amazon.html' import star, productPrice, 
+customButton, productQty, cartProduct, suggestedProduct with context %}
+
+
+{% block page_content %}
+
+    <div class="w-full min-h-0  flex items-center justify-evenly gap-x-4">
+
+        <div class="flex items-center bg-white py-3 gap-6  px-6 rounded-md m-4">
+            <img src="{{ product.thumbnail }}" class="h-16 w-16 object-cover rounded-med">
+            <span class="font-bold">{{ product.title}}</span>
+            <span><i class="bg-white text-green-500 fa-solid fa-circle-check rounded-full""></i>
+                Added to cart ({{quantity}})
+            </span>
+        </div>
+        
+
+        
+        <div class="flex flex-col bg-white py-3 px-6 rounded-md gap-y-4 text-sm m-4">
+            <span> Cart Subtotal: <span class="font-bold">{{ subtotal }}</span> </span>
+            <a href="{{ url_for('checkout') }}" 
+            hx-target="body"> {{ customButton('Proceed to checkout') }} </a>
+           <a href="{{ url_for('get_cart') }}"
+           hx-target="#page-content"
+           hx-select="#page-content"
+           hx-swap="outerHTML show:window:top"> {{ customButton('View Cart', color='bg-white', hoverColor='bg-gray-200', classes='text-black border border-slate-200 shadow-sm')}}</a>
+        </div>
+
+</div>
+
+
+    
+{% endblock page_content %}
+
+

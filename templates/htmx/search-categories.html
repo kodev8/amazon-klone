@@ -1,3 +1,4 @@
+<option value="" >All</option>
 
 {% for cat in categories  %}
     <option value="{{ cat.key.lower() }}" 
@@ -5,3 +6,4 @@
         selected
     {%- endif %}>{{ cat.title }}</option>
 {% endfor %}
+

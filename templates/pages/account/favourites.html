@@ -38,40 +38,43 @@
 
                             {% if current_user.favourites | length > 0 -%}
                                     {% for fave in current_user.favourites -%}
+                                    {% set fave_product = fave.get_product() %}
+
                                     <tr>
                                         <form>
                                             <td class="px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
                                                 
-                                                <a href="{{ url_for('product', product=fave.product._id) }}" class="hover:underline" hx-target="#page-content" hx-select="#page-content" >
-                                                    {{ fave.product.title[:25]}}{% if fave.product.title|length > 25  %}...{% endif %}
+                                                <a href="{{ url_for('product', product=fave_product._id) }}" class="hover:underline" hx-target="#page-content" hx-select="#page-content" >
+                                                    {{ fave_product.title[:25]}}{% if fave_product.title|length > 25  %}...{% endif %}
                                                 </a>
                                             </td>
                                             <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                                                {{ fave.product.category_display }}
+                                                {{ fave_product.category_display }}
                                             </td>
                                             
-                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">{{ fave.favourited_at }}</td>
+                                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">{{ fave.favourited_at.strftime('%b %d, %Y') }}</td>
                                             <td class="px-4 py-4 text-sm whitespace-nowrap">
                                                 <div class="flex items-center gap-x-6">
 
                                                     <span  hx-post="{{ url_for('checkout-single') }}" hx-include="next .info-row" hx-target="body" hx-push-url="true">
-                                                        {{ customButton('Buy Now', color='orange-400', hoverColor='orange-600', classes='text-xs') }}
+                                                        {{ customButton('Buy Now', color='bg-orange-400', hoverColor='bg-orange-600', classes='text-xs') }}
                                                     </span>
 
-                                                    <span hx-delete="{{ url_for('account_favourites') }}" 
-                                                    hx-select="#favourites-table"
-                                                    hx-target="#favourites-table"
-                                                    hx-swap="outerHTML"
-                                                    hx-trigger="click" 
-                                                    hx-include="next [name=product]">
+                                                    <span 
+                                                        hx-delete="{{ url_for('account_favourites') }}" 
+                                                        hx-select="#favourites-table"
+                                                        hx-target="#favourites-table"
+                                                        hx-swap="outerHTML"
+                                                        hx-trigger="click" 
+                                                        hx-include="next [name=product]"
+                                                    >
                                                         <i class="fa-solid fa-trash-can text-red-500 cursor-pointer"></i>
                                                     </span>
 
                                                     <span class="info-row">
-                                                        <input type="hidden" name="product" value="{{fave.product._id}}">
+                                                        <input type="hidden" name="product" value="{{fave_product._id}}">
                                                         <input type="hidden" name="qty" value="1">
                                                     </span>
-                                                   
 
 
                                                 </div>

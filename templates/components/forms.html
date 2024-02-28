@@ -2,10 +2,15 @@
 
 
 <!-- INLINE ERROR -->
-{% macro inlineError(fieldID, text, swap=false) -%}
-  <span id="{{ fieldID }}-error" {% if swap %} hx-swap-oob="true"  {% endif %} class="inline-error absolute flex top-[100%] text-red-500 text-xs text-justify">{{ text }}</span>
+<!-- INLINE ERROR -->
+{% macro inlineError(fieldID, text, swap=false, icon=false) -%}
+  <span id="{{ fieldID }}-error" {% if swap %} hx-swap-oob="outerHTML" {% endif %} class="inline-error flex items-center top-[100%] text-red-500 font-medium text-xs text-justify"> 
+  {% if icon %}
+    <i class="fa-solid fa-circle-exclamation mr-1"></i>
+  {% endif %}
+  {{ text }}
+</span>
 {%- endmacro %}
-
 
 <!-- CUSTOM INPUT -->
 {% macro customInput(field, span_full=false) -%} 
@@ -34,32 +39,35 @@
     {% if field.type == 'TextAreaField' %} 
       {% set classes = classes + " resize-none no-scrollbar p-4" %} 
       {% set divClasses = "min-h-[100px]" %} {% set labelClasses = labelClasses + " top-3" %}
-
-   
-
     {% endif %}
 
-  
-      <div class="relative {% if span_full %}col-span-full {% endif %} {{ divClasses }} flex items-center h-12 rounded-sm border bg-transparent text-sm outline-none border-gray-200">
-        
-        {{ field(class=classes , placeholder="", autocomplete="off")}} 
-        {{ field.label(class=labelClasses)}} 
-        
-        {% if field.type == 'PasswordField' %}
+    
+      <div class="relative custom-input-group  {% if span_full %} col-span-full {% endif %}">
 
-          <i class="fa-regular fa-eye-slash eye-icon"></i>
-        {% endif %}
-
-        {% if field.type == 'TextAreaField' %}
-
-          <div class="absolute bottom-2 right-2">{{ textCount(field, 150) }}</div>
-
-        {% endif %}
-
-        {{ inlineError(field.id) }}
-
+        <div class="relative {{ divClasses }} flex items-center h-12 rounded-lg border bg-transparent text-sm outline-none border-gray-200 overflow-hidden">
           
+          {{ field(class=classes , placeholder="", autocomplete="off")}} 
+          {{ field.label(class=labelClasses)}} 
+          
+          {% if field.type == 'PasswordField' %}
+
+            <i class="fa-regular fa-eye-slash eye-icon"></i>
+          {% endif %}
+
+          {% if field.type == 'TextAreaField' %}
+
+            <div class="absolute bottom-2 right-2">{{ textCount(field, 150) }}</div>
+
+          {% endif %}
+
+
+            
+        </div>
+
+      {{ inlineError(field.id) }}
       </div>
+
+
 
   {% endif %} 
 {%- endmacro %}
@@ -69,6 +77,7 @@
 {% macro accountForm(form) -%}
   <form 
     hx-patch="{{ url_for('account_update') }}"
+    hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
     hx-target="#messages"
     hx-swap="innerHTML"
     novalidate
@@ -99,9 +108,10 @@
           <span class="font-bold "> Reset Password </span>
           <span>••••••••••</span>
       </div>
-      <span hx-target="#modal-bg" hx-swap='outerHTML' hx-trigger='click' hx-get="{{ url_for('reset_password') }}">
-         {{ customButton('Edit', color='white', hoverColor='gray-300', classes='border border-solid border-slate-300 text-sm ml-auto')}}
-      </span>
+      <a href="{{ url_for('reset_password') }}" 
+      hx-target="#modal-bg" hx-select="#modal-bg" hx-swap='outerHTML' >
+         {{ customButton('Edit', color='bg-white', hoverColor='bg-gray-300', classes='border border-solid border-slate-300 text-sm ml-auto', as_submit=false)}}
+      </a>
     </div>
 
   </div>
@@ -119,6 +129,7 @@
 {% macro CServForm(form) -%}
   <form 
     action="{{ url_for('account_cserv_submit') }}"
+    hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
     hx-target="#messages"
     hx-swap="innerHTML"
     enctype="text/plain"
@@ -157,24 +168,23 @@
 {% macro resetPasswordForm(form) -%}
   <form 
     novalidate
-  class="content">
+    method="POST"
+    hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
+    action="{{ url_for('reset_password_request') }}"
+    hx-target="#messages"
+    hx-swap="innerHTML"
+    class="content"
+    >
 
-    <div class="grid sm:grid-cols-1 gap-y-12 gap-x-2 p-4  rounded-md">
+    <div class="grid sm:grid-cols-1 gap-y-4 gap-x-2 p-4  rounded-md">
 
       {% for field in form -%} 
       {{ customInput(field) }}
     {% endfor -%}
     </div>
 
+      {{ customButton('Reset Password', classes='w-fit self-center mt-3 mx-auto', as_submit=true) }}
 
-    <span 
-      hx-post="{{ url_for('reset_password') }}"
-      hx-target="#messages"
-      hx-trigger="click"
-      hx-swap="innerHTML">
-      {{ customButton('Reset Password', classes='w-fit self-center mt-3', as_submit=false)}}
-
-    </span>
   </form>
 
   <script>
@@ -201,7 +211,8 @@ class="grid sm:grid-cols-2 gap-y-4 gap-x-2 content"
         hx-post="{{ url_for('account_address_crud', update=update) }}"
         {% endif %}
         hx-include="closet form"
-        novalidate
+        novalidate    
+        hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
         hx-trigger="click"
         hx-target="#messages"
         hx-swap="innerHTML"
@@ -245,12 +256,13 @@ class="grid sm:grid-cols-3 gap-y-4 gap-x-2 content"
         hx-post="{{ url_for('account_address_anon', update='add') }}"
         hx-include="closet form"
         novalidate
+        hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
         hx-trigger="click"
         hx-target="#modal-bg"
         hx-swap="outerHTML"
         class="col-span-1 flex items-center"
         >
-        {{customButton('Add a Location', color='white', hoverColor='slate-200', 
+        {{customButton('Add a Location', color='bg-white', hoverColor='bg-slate-200', 
         classes='border border-solid border-gray-200 text-sm') }}
       </span>
 
@@ -285,7 +297,11 @@ handleAddrAnonForm();
       {{ customButton('Cancel', classes="!text-sm") }}
     </span>
 
-    <span hx-delete="{{ url_for('account_address_crud', update='remove') }}" hx-trigger="click" hx-include="closest form">
+    <span 
+    hx-delete="{{ url_for('account_address_crud', update='remove') }}"
+    hx-target-4*="{% for field in form %}#{{field.id}}-error{% if not loop.last %},{% endif %}{% endfor %},#messages"
+     hx-trigger="click" 
+     hx-include="closest form">
       {{ customButton('Confirm Delete', classes='!text-sm ml-auto') }}
     </span>
   </div>

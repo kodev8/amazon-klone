@@ -1,6 +1,7 @@
 {% extends 'templates/layout.html' %} 
 {% from 'components/amazon.html' import star, productPrice, customButton, productStars, productStock, productQty %}
 
+
 {% block page_content %}
 
 <div class="grid grid-rows-[auto_1fr] bg-white h-full">
@@ -8,7 +9,8 @@
     <div class="col-span-full py-2 px-3 bg-white border-b border-b-solid z-10 border-slate-200"
     style="box-shadow: 0px 1px 3px 1px rgb(204, 200, 200);"
     >
-        <span class="text-sm text-slate-500 font-medium"><a href="{{ url_for('get_products', category=product.category ) }}" >{{ product.category_display }} </a>
+        <span class="text-sm text-slate-500 font-medium"><a href="{{ url_for('get_products', category=product.category ) }}" 
+            hx-select="#page-content" hx-target="#page-content" hx-swap="show:unset">{{ product.category_display }} </a>
             <i class="fa-solid fa-chevron-right text-[8px] my-auto"></i> 
         {{ product.brand }}</span>
     </div>
@@ -26,7 +28,7 @@
                 <span class="text-2xl font-medium">{{ product.title }}</span> 
 
                 <span>
-                    {{product.rating}} - 
+                    {{ product.rating }} - 
                     {{ productStars(product) }}
                 </span>
 
@@ -66,15 +68,36 @@
             <form class="flex flex-col gap-y-4">
 
 
-            <div class="p-4 ml-3  w-fit min-w-[200px] self-center border-gray-400  border border-solid rounded-xl flex flex-col gap-y-3">
+            <div 
+            class="p-4 ml-3  w-fit min-w-[200px] self-center border-gray-400  border border-solid rounded-xl flex flex-col gap-y-3">
 
                 <div class="flex flex-col gap-y-3 pb-2 border-b border-b-solid border-gray-400">
 
                 {{ productPrice(product) }}
                 <!-- condition for location -->
                 <span class="text-xs">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span class="text-blue-400">Enter your address</span>
+                    <i class="fa-solid fa-location-dot inline"></i>
+
+                    {% if current_user.is_authenticated -%}
+                                {% if current_user.addresses -%}
+                                    {% set addr = current_user.addresses[0] %}
+                                {%- endif %}
+                
+                            {% else %}
+                                {% set addr = session.get('address') %}
+                            {%- endif %}
+          
+                    <span
+                    {% if current_user.is_anonymous %}
+                        hx-get="{{ url_for('account_address_anon', update='add') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click" 
+                        {% endif %}
+                     id='addr-text-1' class="text-blue-400 {% if current_user.is_anonymous %}hover:underline cursor-pointer{% endif %} inline">
+                            {% if addr -%}
+                                {{addr.city[:10]}}{% if addr.city | length > 10 %}... {% endif %}{{addr.zip_code}}
+                            {% else %}
+                                Enter Your Address
+                            {%- endif %}
+                    </span>
                 </span>
 
                 {{ productStock(product) }}
@@ -85,21 +108,25 @@
                         <span
                         hx-post="{{url_for('cart_add')}}"
                         hx-include="closest form"
-                        hx-swap="multi:this:none,#cart-count:outerHTML,#banner,#messages"
+                        hx-swap="multi:#cart-count:outerHTML,#page-content:outerHTML"
                         hx-trigger="click"
                         >
                             {{ customButton('Add to Cart',  classes='text-xs', as_submit=false) }}
                         </span>
 
-
-                    <span  hx-post="{{ url_for('checkout-single') }}" hx-include="closest form" hx-target="body" hx-push-url="true">
-                        {{ customButton('Buy Now', color='orange-400', hoverColor='orange-600', classes='text-xs') }}
+                        <!--  transition:true remvoed: check support for transition on multi swap -->
+                    <span  hx-post="{{ url_for('checkout-single') }}" hx-include="closest form" hx-target="body">
+                        {{ customButton('Buy Now', color='bg-orange-400', hoverColor='bg-orange-600', classes='text-xs') }}
                     </span>
                 
-                </div>
 
                 
-                <span hx-post="{{ url_for('account_favourites')}}" hx-trigger="click" hx-include="closest form"  hx-swap="none">
+                <span 
+                hx-post="{{ url_for('account_favourites')}}" 
+                hx-trigger="click" 
+                hx-swap="none"
+                hx-include="closest form"
+                >
                     {{customButton('Add to List', color="white", hoverColor="gray-300", classes='text-xs border border-solid border-slate-300')}}
                 </span>
 

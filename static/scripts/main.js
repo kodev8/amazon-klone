@@ -30,13 +30,15 @@ function clearCover(event) {
 
 //  links a given elleemtn to the item it shows on hover
 function linkhHoverShow(element, to_hover) {
+
+    // console.log(element, 'linked hover show', to_hover)
     element?.addEventListener('mouseenter', ()=>  {
         
         ht = setTimeout(()=>{
             to_hover?.classList.remove('invisible')
-            element.over.focus()
+            element.focus()
     
-    }, 500)
+    }, 700)
 
     } )
 
@@ -69,7 +71,7 @@ function linkhHoverShow(element, to_hover) {
             } else {
                 to_hover.classList.add('invisible');
             }
-            isMobile = false; // Reset the flag
+            isMobile = false; // Reset the flagcusto
         }
     });
     
@@ -94,7 +96,7 @@ function select(how) {
 
 // checking selecting a new cart quantity
 function selectQty(event) {
-    console.log(event.target)
+    // console.log(event.target)
 
     if (isNaN(event.target.value)){
         // show update button
@@ -106,13 +108,15 @@ function selectQty(event) {
     return true
 }
 
-function handleCustomInputs() {
-    document.querySelectorAll('.custom-input')?.forEach(customInput => {
 
-        customInput.addEventListener('input', () => {
-          let inlineError = customInput.parentElement.querySelector('.inline-error')
-          inlineError.innerText = ''
-            
+function handleCustomInputs() {
+    // console.log('exec')
+    document.querySelectorAll('.custom-input-group')?.forEach(customInputGroup => {
+
+        let customInput = customInputGroup.querySelector('.custom-input')
+        customInput.addEventListener('input', (event) => {
+            let inlineError = customInputGroup.querySelector('.inline-error')
+            inlineError.innerHTML = ''
         })
       
         // let eye ico control if text input is password or text
@@ -154,10 +158,12 @@ country.onchange = () => zip.value = ''
 }
 
 function openSideNav() {
-    console.log('hhh')
     let sideNav = document.querySelector('#side-nav')
     let sideX =   document.querySelector('#side-x')
     let modalBg = document.querySelector('#modal-bg')
+   document.querySelector('body').style.overflow='hidden'
+    
+
 
     sideNav?.classList.remove('closed'); 
     sideX?.classList.remove('closed')
@@ -168,9 +174,49 @@ function openSideNav() {
 function closeSideNav() {
     let sideNav = document.querySelector('#side-nav')
     let sideX =   document.querySelector('#side-x')
-    let modalBg = document.querySelector('#modal-bg')
+   document.querySelector('body').style.overflowY='auto'
+   let modalBg = document.querySelector('#modal-bg')
 
     sideNav.classList.add('closed'); 
     modalBg.classList.add('hidden'); 
     sideX.classList.add('closed')
 }
+
+function checkSearchValue(event) {
+    return event.target.value.trim() != ""
+}
+
+function toggleAll (element, ...classes) {
+    classes.forEach(c => element.classList.toggle(c))
+}
+
+
+function panel() {
+
+    const signin = document.querySelector('#nav-signin')
+    const signinHover = document.querySelector('#nav-signin-hover')
+    const icon = signin.querySelector('i')
+    
+      if (signin) {
+        
+        linkhHoverShow(signin, signinHover)
+    
+        signin.addEventListener('mouseenter', ()=>{
+    
+          let rect = icon.getBoundingClientRect()
+          let swidth = parseFloat(getComputedStyle(signinHover).width )
+    
+          let arrowStyle = getComputedStyle(signinHover, ':after')
+          let arrowHeight = parseFloat(arrowStyle.height)
+    
+          let iconwidth=parseFloat(getComputedStyle(icon).width)
+    
+          let arrowPlacement = rect.x
+          signinHover.style.left = `${arrowPlacement -  swidth + swidth/4+ iconwidth/2}px`
+          signinHover.style.top = `${rect.bottom + arrowHeight/4 - 2  }px`
+    
+        })
+       
+      }
+  }
+  

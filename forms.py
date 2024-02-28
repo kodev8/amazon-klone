@@ -1,12 +1,8 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, EmailField, TextAreaField, DateField, SubmitField, HiddenField
-from wtforms.widgets import FileInput
-from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError, Optional
-from markupsafe import Markup
+from wtforms import StringField, PasswordField, EmailField, TextAreaField, DateField, SubmitField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 import re
 from datetime import datetime
-from wtforms.widgets.core import html_params
 
 class Formatter():
     
@@ -24,7 +20,7 @@ class Validator:
     _email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
     _password_pattern = r'^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9\s]).{8,}'
     _name_pattern = r'^[a-zA-z][a-zA-z-.\'\s]*[a-zA-z]?$'
-    _username_pattern = '^[a-zA-z0-9-_\.]+$'
+    _username_pattern = r'^[a-zA-z0-9-_\.]+$'
 
     @staticmethod
     def validate_name(form, name):
@@ -87,13 +83,11 @@ class ProfileCommonFields:
     fname = StringField('First Name', validators=[customDR(), Length(min=1, max=50), Validator.validate_name], filters=[Formatter.format_title])
     lname = StringField('Last Name', validators=[customDR(), Length(min=1, max=50), Validator.validate_name], filters=[Formatter.format_title])
     dob = DateField('Date of Birth', validators=[customDR(), ],)
-
     
     def validate_dob(form, field):
         today = datetime.today()
         min_year = today.year - 16
         min_age_date = datetime(min_year, today.month, today.day).date()
-        print(min_age_date)
         if field.data >  min_age_date:
             raise ValidationError("You must be 16 or older to enter.")
 

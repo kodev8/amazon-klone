@@ -24,13 +24,13 @@
         bg-gray-100 relative border-b border-solid border-slate-200">
 
         <!-- logo -->
-        <a hx-boost='false' href=" {{ url_for('index') }}" class=" flex items-center justify-center cursor-pointer pt-2 px-2">
-          <img src="{{ url_for('static', filename='assets/logo/logo.svg') }}" class="aspect-auto h-[40px]" alt="">
+        <a hx-init-carousels href=" {{ url_for('index') }}" class=" flex items-center justify-center cursor-pointer pt-2 px-2">
+          <img src="{{ url_for('static', filename='assets/logos/logo.svg') }}" class="aspect-auto h-[40px]" alt="">
         </a>
 
 
         <div class="flex flex-grow justify-center">
-           <span class="text-3xl font-normal">Checkout (<span class="text-[var(--a-blue)] font-medium">{{ sub_count }} items</span>)</span>
+           <span class="text-3xl font-normal">Checkout (<span class="text-[var(--a-blue)] font-medium">{{ sub_count }} item{%- if sub_count !=1 %}s{%- endif %}</span>)</span>
         </div>
 
        
@@ -57,7 +57,7 @@
                     {% set addrcheck = true  %}
                 <span class="font-bold">{{current_user.fname}} {{current_user.lname}}</span>
                 <span>{{ addr.line1 }}</span>
-                <span>{{ addr.city }},{{ addr.zip_code }}</span>
+                <span>{{ addr.city }}, {{ addr.zip_code }}</span>
                 <span>{{  addr.country }}</span>
                 
                 {% endif %}
@@ -73,23 +73,31 @@
 
             <!-- next 4 -->
             <span id="paymethod"></span>
+
             
         </div>
-                    
+                  
+                <form>
+        
             <div class="bg-white border border-solid justify-self-center rounded-xl border-slate-300 p-4 min-w-72  h-fit flex flex-col " >
 
                 {% if addrcheck %}
 
-                <span id="pay-actions" hx-get="{{ url_for('pay_method') }}" hx-target="#paymethod" hx-swap="outerHTML" hx-select="#paymethod">
-                    {{ customButton('Use this address', color='yellow-300', classes='!font-light !text-sm')}}
-                </span>
+                    <span id="pay-actions" hx-get="{{ url_for('pay_method') }}" hx-target="#paymethod" hx-swap="outerHTML transition:true" hx-select="#paymethod">
+                        {{ customButton('Use this address', classes='!font-light !text-sm')}}
+                    </span>
+
+                   <input type="hidden" name='cart' value="{{cart_id}}"/>
+                   <input type="hidden" name="order" value="{{ order_id }}"/>
+                </form>
+              
 
                 {%else%}
 
                 <span
                 hx-get="{{ url_for('account_address_get', update='add', next='/checkout') }}" hx-target="#modal-bg" hx-swap="innerHTML" hx-trigger="click"
                 >
-                {{ customButton('Set up an address', color='yellow-300', classes='!font-light !text-sm')}}
+                {{ customButton('Set up an address', classes='!font-light !text-sm')}}
 
                 </span>
 
